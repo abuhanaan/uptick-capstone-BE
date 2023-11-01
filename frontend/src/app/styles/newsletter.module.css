@@ -1,0 +1,56 @@
+.newsletter {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.newsletterBackground1 {
+  position: absolute;
+  height: 40%;
+  width: 10%;
+}
+
+.newsletterBackground2 {
+  position: absolute;
+  height: 40%;
+  width: 10%;
+  right: 0;
+}
+
+.newsletterH3 {
+  color: var(--Rumoney-Black-60, #1e1e1e);
+  font-size: 27px;
+  font-weight: 600;
+}
+
+.newsletterH5 {
+  color: var(--Rumoney-Black-40, #696969);
+  font-weight: 600;
+}
+
+.newsletterForm {
+  margin: 2rem 0;
+}
+
+.newsletterForm input {
+  border-radius: 8px;
+  border: 1px solid var(--Rumoney-Black-20, #b4b4b4);
+  padding: 0.5rem 1rem;
+  width: 30rem;
+}
+
+.newsletterForm button {
+  border-radius: 8px;
+  background: linear-gradient(278deg, #1e2430 -2.6%, #000 100%);
+  box-shadow: 0px 8px 16px 0px #6c6c6c;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  position: absolute;
+  right: 31%;
+}
+
+.newsletterForm input::placeholder {
+  color: var(--Rumoney-Black-20, #b4b4b4);
+  font-size: small;
+  font-style: normal;
+  font-weight: 400;
+}
