@@ -103,7 +103,7 @@ const Programs: React.FC = () => {
   return (
     <div className="container bg-white text-black">
       <div className="flex flex-col items-center justify-center">
-        <h2 className="text-4xl font-bold text-center font-montserrat font-semibold">
+        <h2 className="text-4xl text-center font-montserrat font-semibold">
           Our Programs
         </h2>
       </div>

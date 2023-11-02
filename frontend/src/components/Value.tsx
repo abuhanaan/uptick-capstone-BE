@@ -85,8 +85,7 @@ const Value = () => {
     <div className="container bg-white text-black font-montserrat pt-10 pb-20">
       <div
         className="absolute left-0 top-100 w-full h-full bg-cover bg-left"
-        style={{ backgroundImage: 'url("/your-background-image.jpg")' }}
-      >
+        style={{ backgroundImage: 'url("/your-background-image.jpg")' }}>
         <Image src="./pattern.svg" alt="" width={100} height={100} />
       </div>
       <h1 className="text-2xl font-bold text-left p-2">
@@ -109,7 +108,7 @@ const Value = () => {
                 {group.content.map((item, itemIndex) => (
                   <div key={itemIndex} className="flex flex-col items-start ">
                     <Image
-                      src={item.icon}
+                      src="./value.svg"
                       alt=""
                       width={35}
                       height={35}
