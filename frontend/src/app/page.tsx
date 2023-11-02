@@ -3,7 +3,6 @@ import { Mission } from "@/components/Mission";
 import { Newsletter } from "@/components/Newsletter";
 import { Welcome } from "@/components/welcome";
 import Testimonial from "@/components/Testimonial";
-import { Welcome } from "@/components/Welcome";
 
 export default function Home() {
   return (
