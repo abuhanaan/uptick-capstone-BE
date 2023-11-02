@@ -18,7 +18,8 @@ export const Hero = () => {
             <a
               rel="noopener noreferrer"
               href="#"
-              className="px-8 py-3 text-center text-lg font-semibold rounded dark:bg-violet-400 dark:text-blue-950">
+              className="px-8 py-3 text-center text-lg font-semibold rounded dark:bg-violet-400 dark:text-blue-950"
+            >
               Learn About Us
             </a>
           </div>
