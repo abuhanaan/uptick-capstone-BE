@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String
+  role      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+
+model Contact {
+  id             Int       @id @default(autoincrement())
+  name           String
+  email          String
+  phone          String?
+  message        String
+  dateSubmitted  DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Post {
+  id               Int       @id @default(autoincrement())
+  title            String
+  content          String
+  author           String
+  publicationDate  DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tags             Tag[]
+}
+
+model Tag {
+  id               Int       @id @default(autoincrement())
+  name             String
+  description      String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  posts            Post[]
+}
+
+model Job {
+  id                   Int       @id @default(autoincrement())
+  title                String
+  description          String
+  requirements         String
+  applicationFormLink  String
+  companyLogo          String
+  applicationDeadline  DateTime
+  startDate            DateTime
+  endDate              DateTime
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  applicant             Application?  @relation(fields: [applicantId], references: [id])
+  applicantId           Int?
+}
+
+model Program {
+  id                     Int       @id @default(autoincrement())
+  name                   String
+  description            String
+  type                   String
+  curriculumOutline      String[]
+  objectives             String
+  benefits               String
+  prerequisites          String
+  duration               String
+  applicationFormLink    String
+  enrollmentInformation  String
+  startDate              DateTime
+  endDate                DateTime
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  applicant             Application?  @relation(fields: [applicantId], references: [id])
+  applicantId           Int?
+}
+
+model Application {
+  id                     Int       @id @default(autoincrement())
+  firstname              String
+  lastName               String
+  email                  String
+  phone                  String
+  address                String
+  resume                 String
+  programPreferenceID    String
+  jobAppliedForID        String
+  applicationDate        DateTime  @default(now())
+  status                 String
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  programs               Program[]
+  jobs                   Job[]
+}
+
