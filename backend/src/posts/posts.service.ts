@@ -33,10 +33,9 @@ export class PostsService {
         orderBy: { createdAt: 'desc' },
       });
 
-      if (!posts || posts.length === 0) {
+      if (!posts) {
         throw new HttpException('No posts found', HttpStatus.NOT_FOUND);
       }
-
       return posts;
     } catch (error) {
       throw new HttpException(
