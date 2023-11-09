@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +18,7 @@
   }
 }
 
-body {
+/* body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
       to bottom,
@@ -24,4 +26,125 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+} */
+
+nav {
+  background: var(--blue-blue-dark-shade-90, #070c19);
+  display: flex;
+  padding: 24px 60px;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+}
+
+nav ul {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav ul li {
+  margin: 0 2rem;
+  color: #fff;
+  font-family: "Raleway", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+nav ul li a:hover {
+  color: #477bff;
+}
+
+nav button {
+  color: var(--neutral-11, #fff);
+  font-feature-settings: "clig" off, "liga" off;
+  font-family: "Raleway", sans-serif;
+  font-weight: 600;
+  letter-spacing: 1.25px;
+  border-radius: 8px;
+  background: var(--blue-blue-dark-shade-blue, #477bff);
+  padding: 10px 20px;
+  font-size: small;
+}
+
+nav button:hover {
+  opacity: 0.8;
+}
+
+nav .menu-icon {
+  color: #fff;
+  display: none;
+}
+
+.dropdown-menu {
+  display: none;
+  background: #070c19;
+  right: 2rem;
+  top: 60px;
+  overflow: hidden;
+  transition: height 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dropdown-menu li {
+  list-style: none;
+  padding: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: small;
+  color: #fff;
+  font-family: "Raleway", sans-serif;
+}
+
+.dropdown-menu .nav-btn {
+  background: #477bff;
+  text-align: center;
+}
+
+.dropdown-menu button {
+  font-size: small;
+  color: #fff;
+  padding: 10px 0;
+}
+
+/* Tablets and under */
+@media all and (max-width: 768px) {
+  nav {
+    padding: 20px 20px;
+  }
+
+  nav img {
+    width: 100px;
+  }
+
+  nav ul li {
+    margin: 0 1rem;
+  }
+
+  nav ul li a {
+    font-size: small;
+  }
+
+  nav button {
+    padding: 5px 10px;
+    font-size: xx-small;
+  }
+}
+
+/* Tablets and under */
+@media all and (max-width: 500px) {
+  nav .nav-links,
+  nav .nav-btn {
+    display: none;
+  }
+
+  nav .menu-icon {
+    display: block;
+  }
+
+  .dropdown-menu {
+    display: block;
+  }
 }
