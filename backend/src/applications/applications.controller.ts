@@ -6,11 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
 } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('applications')
 @ApiTags('applications')
@@ -18,8 +22,17 @@ export class ApplicationsController {
   constructor(private readonly applicationsService: ApplicationsService) {}
 
   @Post()
-  create(@Body() createApplicationDto: CreateApplicationDto) {
-    return this.applicationsService.create(createApplicationDto);
+  @UseInterceptors(FileInterceptor('file'))
+  create(
+    @Body() createApplicationDto: CreateApplicationDto,
+    @UploadedFile(new ParseFilePipe({ validators: [] }))
+    file: Express.Multer.File,
+  ) {
+    return this.applicationsService.create(
+      createApplicationDto,
+      file.originalname,
+      file.buffer,
+    );
   }
 
   @Get()
