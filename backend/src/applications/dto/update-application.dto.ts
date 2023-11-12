@@ -4,5 +4,5 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateApplicationDto extends PartialType(CreateApplicationDto) {
   @ApiProperty()
-  status?: string;
+  status: string;
 }

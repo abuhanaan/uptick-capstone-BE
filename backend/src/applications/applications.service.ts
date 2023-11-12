@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -15,11 +15,49 @@ export class ApplicationsService {
     private readonly configService: ConfigService,
   ) {}
 
+  async checkApplicationUniqueness(id: number) {
+    const application = await this.prisma.application.findUnique({
+      where: { id },
+    });
+    if (!application) {
+      throw new HttpException('Application Not Found', HttpStatus.NOT_FOUND);
+    }
+  }
+
   async create(
     createApplicationDto: CreateApplicationDto,
     fileName: string,
     file: Buffer,
   ) {
+    const existingJobApplication = await this.prisma.application.findFirst({
+      where: {
+        email: createApplicationDto.email,
+        jobAppliedForID: createApplicationDto.jobAppliedForID,
+      },
+    });
+    const existingProgramApplication = await this.prisma.application.findFirst({
+      where: {
+        email: createApplicationDto.email,
+        programPreferenceID: createApplicationDto.programPreferenceID,
+      },
+    });
+    if (existingJobApplication || existingProgramApplication) {
+      throw new HttpException(
+        'This application already exist',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    if (
+      createApplicationDto.programPreferenceID &&
+      createApplicationDto.jobAppliedForID
+    ) {
+      throw new HttpException(
+        'You can only apply for one application type',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     await this.s3Client.send(
       new PutObjectCommand({
         Bucket: '460624858521-nestjs-uploader',
@@ -27,26 +65,32 @@ export class ApplicationsService {
         Body: file,
       }),
     );
-    const newDTO = { ...createApplicationDto };
-    newDTO.resume = `${this.configService.getOrThrow(
+    const newApplicationDTO = { ...createApplicationDto };
+    newApplicationDTO.resume = `${this.configService.getOrThrow(
       'S3_BASE_URL',
     )}/${fileName}`;
-    return this.prisma.application.create({ data: newDTO });
+    return this.prisma.application.create({ data: newApplicationDTO });
   }
 
   findAll() {
-    return `This action returns all applications`;
+    return this.prisma.application.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} application`;
+  async findOne(id: number) {
+    await this.checkApplicationUniqueness(id);
+    return this.prisma.application.findUnique({ where: { id } });
   }
 
-  update(id: number, updateApplicationDto: UpdateApplicationDto) {
-    return `This action updates a #${id} application`;
+  async update(id: number, updateApplicationDto: UpdateApplicationDto) {
+    await this.checkApplicationUniqueness(id);
+    return this.prisma.application.update({
+      where: { id },
+      data: updateApplicationDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} application`;
+  async remove(id: number) {
+    await this.checkApplicationUniqueness(id);
+    return this.prisma.application.delete({ where: { id } });
   }
 }

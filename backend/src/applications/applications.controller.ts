@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -41,20 +42,20 @@ export class ApplicationsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.applicationsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.applicationsService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateApplicationDto: UpdateApplicationDto,
   ) {
-    return this.applicationsService.update(+id, updateApplicationDto);
+    return this.applicationsService.update(id, updateApplicationDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.applicationsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.applicationsService.remove(id);
   }
 }
