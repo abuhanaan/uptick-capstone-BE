@@ -10,6 +10,8 @@ import {
   UploadedFile,
   ParseFilePipe,
   ParseIntPipe,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -23,6 +25,7 @@ export class ApplicationsController {
   constructor(private readonly applicationsService: ApplicationsService) {}
 
   @Post()
+  @UsePipes(new ValidationPipe())
   @UseInterceptors(FileInterceptor('file'))
   create(
     @Body() createApplicationDto: CreateApplicationDto,
@@ -47,6 +50,7 @@ export class ApplicationsController {
   }
 
   @Patch(':id')
+  @UsePipes(new ValidationPipe())
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateApplicationDto: UpdateApplicationDto,
