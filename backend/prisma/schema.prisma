@@ -99,8 +99,9 @@ model Application {
   phone                  String
   address                String
   resume                 String
-  programPreferenceID    String
-  jobAppliedForID        String
+  type                   String
+  programPreferenceID    Int?
+  jobAppliedForID        Int?
   applicationDate        DateTime  @default(now())
   status                 String
   createdAt              DateTime  @default(now())

@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsPhoneNumber } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, IsPhoneNumber } from 'class-validator';
 
 export class CreateApplicationDto {
-  @ApiProperty()
   @IsNotEmpty()
+  @ApiProperty()
   firstname: string;
 
-  @ApiProperty()
   @IsNotEmpty()
+  @ApiProperty()
   lastName: string;
 
   @IsNotEmpty()
@@ -28,11 +28,16 @@ export class CreateApplicationDto {
   resume: string;
 
   @ApiProperty()
-  programPreferenceID: string;
+  programPreferenceID: number;
 
   @ApiProperty()
-  jobAppliedForID: string;
+  jobAppliedForID: number;
 
   @ApiProperty()
   status: string = 'pending';
+
+  @IsNotEmpty()
+  @IsIn(['job', 'program'])
+  @ApiProperty()
+  type: string;
 }
