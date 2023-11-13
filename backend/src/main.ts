@@ -16,17 +16,11 @@ async function bootstrap() {
     .setTitle('Uptick Fellowship - Team A')
     .setDescription('The Capstone Project API description')
     .setVersion('0.1')
-    .addBearerAuth()
     .build();
-
-    const options: SwaggerDocumentOptions = {
-      operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
-    };
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
+  await app.listen(3000);
 }
 bootstrap();
