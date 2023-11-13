@@ -58,7 +58,76 @@ export class ProgramsService {
   }
   
   
+  async getAvailablePrograms(order_by?: OrderBy,
+    order_direction?: OrderDirection,
+    type?: string): Promise<Object> {
+      let wherePart: { type?: string } = {};
   
+    if (type) {
+      wherePart.type = type;
+    }
+    try {
+      let orderByField: string | undefined;
+  
+      if (order_by) {
+        orderByField = order_by;
+      }
+      const orderByDirection = order_direction ? order_direction : 'desc';
+      const currentDate = new Date();
+      const programs = await this.prisma.program.findMany({
+        where: {
+          endDate: {
+            gt: currentDate,
+          },
+          ...wherePart,
+        },
+        orderBy: orderByField ? { [orderByField]: orderByDirection } : undefined,
+      });
+
+      if (programs.length === 0) {
+        throw new NotFoundException('No available programs found.');
+      }
+
+      return { programs };
+    } catch (error) {
+      throw error;
+    }
+  }  
+  async getUnavailablePrograms(order_by?: OrderBy,
+    order_direction?: OrderDirection,
+    type?: string): Promise<Object> {
+      let wherePart: { type?: string } = {};
+  
+    if (type) {
+      wherePart.type = type;
+    }
+    try {
+      let orderByField: string | undefined;
+  
+      if (order_by) {
+        orderByField = order_by;
+      }
+      const orderByDirection = order_direction ? order_direction : 'desc';
+      const currentDate = new Date();
+      const programs = await this.prisma.program.findMany({
+        where: {
+          endDate: {
+            lte: currentDate,
+          },
+          ...wherePart,
+        },
+        orderBy: orderByField ? { [orderByField]: orderByDirection } : undefined,
+      });
+
+      if (programs.length === 0) {
+        throw new NotFoundException('No available programs found.');
+      }
+
+      return { programs };
+    } catch (error) {
+      throw error;
+    }
+  }  
   
   
 
