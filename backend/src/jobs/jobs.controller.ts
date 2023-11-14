@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  Query,
+  ParseIntPipe,
+  DefaultValuePipe,
+} from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { Response } from 'express';
 
 @Controller('jobs')
 export class JobsController {
@@ -9,12 +22,16 @@ export class JobsController {
 
   @Post()
   create(@Body() createJobDto: CreateJobDto) {
-    return this.jobsService.create(createJobDto);
+    const companyLogo = '';
+    return this.jobsService.create({ ...createJobDto, companyLogo });
   }
 
   @Get()
-  findAll() {
-    return this.jobsService.findAll();
+  findAll(
+    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
+    @Query('take', new DefaultValuePipe(0), ParseIntPipe) take?: number,
+  ) {
+    return this.jobsService.findAllJobs({ skip, take });
   }
 
   @Get(':id')
@@ -28,7 +45,8 @@ export class JobsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.jobsService.remove(+id);
+  async remove(@Res() res: Response, @Param('id') id: string) {
+    await this.jobsService.remove(+id);
+    res.json({ msg: 'job deleted succesfully!' });
   }
 }
