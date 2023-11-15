@@ -1,25 +1,54 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 import { Job } from './entities/job.entity';
+import { CreateJobDto } from './dto/create-job.dto';
+import { ConfigService } from '@nestjs/config';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class JobsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly s3Client = new S3Client({
+    region: this.configService.getOrThrow('AWS_S3_REGION'),
+  });
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  async create(data: Prisma.JobCreateInput): Promise<Job> {
+  private async logoUpload(filename: string, file: Buffer): Promise<string> {
+    await this.s3Client.send(
+      new PutObjectCommand({
+        Bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
+        Key: filename,
+        Body: file,
+      }),
+    );
+    const fileUrl = `${this.configService.getOrThrow(
+      'S3_BASE_URL',
+    )}/${filename}`;
+    return fileUrl;
+  }
+
+  async create(
+    dto: CreateJobDto,
+    fileName: string,
+    file: Buffer,
+  ): Promise<Job> {
+    const companyLogo = await this.logoUpload(fileName, file);
+    const data = { ...dto, companyLogo };
     const job = await this.prisma.job.create({ data });
     return job;
   }
 
-  async findAllJobs(params?: { skip?: number; take?: number }): Promise<Job[]> {
-    const { skip, take } = params;
-    const programs = await this.prisma.job.findMany({
+  async findAllJobs(Iskip?: number, Itake?: number): Promise<Job[]> {
+    const skip = Iskip ? Iskip : 0;
+    const take = Itake ? Itake : 5;
+    const jobs = await this.prisma.job.findMany({
       skip,
       take,
       orderBy: { createdAt: 'desc' },
     });
-    return programs;
+    return jobs;
   }
 
   async findOne(id: number): Promise<Job> {

@@ -8,43 +8,55 @@ import {
   Validate,
 } from 'class-validator';
 import { DateNotGreaterThan } from '../decorators/date.decorator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateJobDto {
   @IsString()
   @IsDefined()
+  @ApiProperty()
   @IsNotEmpty({ message: 'title is required!' })
-  readonly title: string;
+  title: string;
 
   @IsString()
   @IsDefined()
+  @ApiProperty()
   @IsNotEmpty({ message: 'description is a required field!' })
-  readonly description: string;
+  description: string;
 
   @IsString()
   @IsDefined()
+  @ApiProperty()
   @IsNotEmpty({ message: 'requirements is a required field!' })
-  readonly requirements: string;
+  requirements: string;
 
-  @IsDefined()
   @IsUrl({})
+  @IsDefined()
+  @ApiProperty()
   @IsNotEmpty({ message: 'applicationFormLink is a required field!' })
-  readonly applicationFormLink: string;
+  applicationFormLink: string;
 
+  @ApiProperty()
   @Type(() => Date)
   @IsDate({ message: 'Invalid applicationDeadLine format!' })
   @IsNotEmpty({ message: 'applicationDeadLine is a required field!' })
-  readonly applicationDeadline: Date;
+  applicationDeadline: Date;
 
+  @ApiProperty()
   @Type(() => Date)
   @IsDate({ message: 'Invalid startDate format!' })
   @IsNotEmpty({ message: 'startDate is a required field!' })
-  readonly startDate: Date;
+  startDate: Date;
 
+  @ApiProperty()
   @Type(() => Date)
   @IsDate({ message: 'Invalid endDate format!' })
   @Validate(DateNotGreaterThan, ['startDate'], {
     message: 'End date must not be less than start date',
   })
   @IsNotEmpty({ message: 'endDate is a required field!' })
-  readonly endDate: Date;
+  endDate: Date;
+
+  @ApiProperty()
+  @ApiProperty()
+  companyLogo: string;
 }
