@@ -27,10 +27,12 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Job } from './entities/job.entity';
+import { FilterJobsDto } from './dto/get-all-jobs-filter.dto';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -38,6 +40,7 @@ export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
   @Post()
+  @ApiBody({ type: CreateJobDto })
   @ApiCreatedResponse({ type: Job })
   @ApiInternalServerErrorResponse()
   @UsePipes(new ValidationPipe())
@@ -57,11 +60,48 @@ export class JobsController {
   @Get()
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
+  @ApiQuery({ name: 'title', required: false, type: String })
+  @ApiQuery({ name: 'requirements', required: false, type: String })
+  @ApiQuery({ name: 'openJobs', required: false, type: Boolean })
+  @ApiQuery({ name: 'closedJobs', required: false, type: Boolean })
+  @ApiOkResponse({ type: Job, isArray: true })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findAll(
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
     @Query('take', new DefaultValuePipe(0), ParseIntPipe) take?: number,
+    @Query() filter?: FilterJobsDto,
   ): Promise<Job[]> {
-    return this.jobsService.findAllJobs(skip, take);
+    return this.jobsService.findAllJobs(filter, skip, take);
+  }
+
+  @Get('open')
+  @ApiQuery({ name: 'skip', required: false, type: Number })
+  @ApiQuery({ name: 'take', required: false, type: Number })
+  @ApiOkResponse({ type: Job, isArray: true })
+  @ApiInternalServerErrorResponse({ description: 'Internal server Error' })
+  getAllOpenJobs(
+    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
+    @Query('take', new DefaultValuePipe(0), ParseIntPipe) take?: number,
+  ): Promise<Job[]> {
+    const filterDto = new FilterJobsDto();
+    filterDto.openJobs = true;
+
+    return this.jobsService.findAllJobs(filterDto, skip, take);
+  }
+
+  @Get('closed')
+  @ApiQuery({ name: 'skip', required: false, type: Number })
+  @ApiQuery({ name: 'take', required: false, type: Number })
+  @ApiOkResponse({ type: Job, isArray: true })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  getAllClosedJobs(
+    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
+    @Query('take', new DefaultValuePipe(0), ParseIntPipe) take?: number,
+  ): Promise<Job[]> {
+    const filterDto = new FilterJobsDto();
+    filterDto.closedJobs = true;
+
+    return this.jobsService.findAllJobs(filterDto, skip, take);
   }
 
   @ApiOkResponse({ type: Job })
@@ -73,10 +113,12 @@ export class JobsController {
     return this.jobsService.findOne(+id);
   }
 
-  @ApiBody({ type: UpdateJobDto })
+  @ApiParam({ name: 'id', type: Number, description: 'Job ID', required: true })
+  @ApiOkResponse({ type: Job })
   @ApiNotFoundResponse({
     description: `Job with ID doesn't exist on this server!`,
   })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -86,6 +128,7 @@ export class JobsController {
   }
 
   @Delete(':id')
+  @ApiParam({ name: 'id', type: Number, description: 'Job ID', required: true })
   @ApiNotFoundResponse({
     description: `Job with ID doesn't exist on this server`,
   })

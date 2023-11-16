@@ -4,6 +4,7 @@ import { Job } from './entities/job.entity';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ConfigService } from '@nestjs/config';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { FilterJobsDto } from './dto/get-all-jobs-filter.dto';
 
 @Injectable()
 export class JobsService {
@@ -29,6 +30,24 @@ export class JobsService {
     return fileUrl;
   }
 
+  private buildQuery(filter: FilterJobsDto): Record<string, any> {
+    const currentDate = new Date();
+    const query: Record<string, any> = {
+      where: { ...filter },
+    };
+
+    delete query.where.openJobs;
+    delete query.where.closedJobs;
+
+    if (filter.openJobs) {
+      query.where.applicationDeadline = { gt: currentDate };
+    } else if (filter.closedJobs) {
+      query.where.applicationDeadline = { lt: currentDate };
+    }
+    console.log(query);
+    return query;
+  }
+
   async create(
     dto: CreateJobDto,
     fileName: string,
@@ -40,12 +59,18 @@ export class JobsService {
     return job;
   }
 
-  async findAllJobs(Iskip?: number, Itake?: number): Promise<Job[]> {
+  async findAllJobs(
+    filter?: FilterJobsDto,
+    Iskip?: number,
+    Itake?: number,
+  ): Promise<Job[]> {
     const skip = Iskip ? Iskip : 0;
     const take = Itake ? Itake : 5;
+    const query = this.buildQuery(filter);
     const jobs = await this.prisma.job.findMany({
       skip,
       take,
+      ...query,
       orderBy: { createdAt: 'desc' },
     });
     return jobs;
