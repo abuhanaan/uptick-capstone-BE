@@ -62,8 +62,6 @@ export class JobsController {
   @ApiQuery({ name: 'take', required: false, type: Number })
   @ApiQuery({ name: 'title', required: false, type: String })
   @ApiQuery({ name: 'requirements', required: false, type: String })
-  @ApiQuery({ name: 'openJobs', required: false, type: Boolean })
-  @ApiQuery({ name: 'closedJobs', required: false, type: Boolean })
   @ApiOkResponse({ type: Job, isArray: true })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findAll(
