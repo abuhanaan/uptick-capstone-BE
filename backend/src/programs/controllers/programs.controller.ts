@@ -29,6 +29,24 @@ export class ProgramsController {
 
     }
 
+    @Get('/available')
+    @ApiOperation({ summary: 'Get all available programs' })
+    async getAvailablePrograms(
+      @Query() {  order_by, order_direction, type }: ProgramPaginationParams): Promise<Object> {
+       {
+        return await this.programsService.getAvailablePrograms(order_by, order_direction,type);
+    
+      } 
+    }
+    @Get('/unavailable')
+    @ApiOperation({ summary: 'Get all closed programs' })
+    async getUnavailablePrograms(
+      @Query() {  order_by, order_direction, type }: ProgramPaginationParams): Promise<Object> {
+       {
+        return await this.programsService.getUnavailablePrograms(order_by, order_direction,type);
+    
+      } 
+    }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a program by ID' })
