@@ -57,6 +57,5 @@ export class CreateJobDto {
   endDate: Date;
 
   @ApiProperty()
-  @ApiProperty()
   companyLogo: string;
 }
