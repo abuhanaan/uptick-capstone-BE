@@ -85,13 +85,14 @@ export class PostsService {
     }
   }
 
-  async deletePost(where: Prisma.PostWhereUniqueInput): Promise<void> {
+  async deletePost(where: Prisma.PostWhereUniqueInput): Promise<string> {
     try {
       const post = await this.prismaService.post.delete({ where });
 
       if (!post) {
         throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
       }
+      return 'Post deleted successfully...';
     } catch (error) {
       throw new HttpException(
         'Failed to delete the post',
