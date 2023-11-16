@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -21,14 +28,14 @@ export class ApplicationsService {
       where: { id },
     });
     if (!application) {
-      throw new HttpException('Application Not Found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException('Application Not Found');
     }
   }
 
   async checkIfProgramExists(id: number) {
     const program = await this.prisma.program.findUnique({ where: { id } });
     if (!program) {
-      throw new HttpException('Program Not Found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException('Program Not Found');
     }
   }
 
@@ -44,102 +51,112 @@ export class ApplicationsService {
     fileName: string,
     file: Buffer,
   ) {
-    console.log(createApplicationDto);
-    console.log({
-      appemeil: createApplicationDto.email,
-      appProgid: createApplicationDto.programPreferenceID,
-      appJobid: createApplicationDto.jobAppliedForID,
-    });
+    try {
+      if (
+        createApplicationDto.programPreferenceID &&
+        createApplicationDto.jobAppliedForID
+      ) {
+        throw new BadRequestException(
+          'You can only apply for one application type',
+        );
+      }
 
-    if (
-      createApplicationDto.programPreferenceID &&
-      createApplicationDto.jobAppliedForID
-    ) {
-      throw new HttpException(
-        'You can only apply for one application type',
-        HttpStatus.BAD_REQUEST,
+      let existingJobApplication: Application,
+        existingProgramApplication: Application;
+
+      if (createApplicationDto.type === 'program') {
+        createApplicationDto.programPreferenceID =
+          +createApplicationDto.programPreferenceID;
+        this.checkIfProgramExists(createApplicationDto.programPreferenceID);
+        createApplicationDto.jobAppliedForID = null;
+        existingProgramApplication = await this.prisma.application.findFirst({
+          where: {
+            AND: [
+              { email: createApplicationDto.email },
+              {
+                programPreferenceID: +createApplicationDto.programPreferenceID,
+              },
+            ],
+          },
+        });
+      }
+      if (createApplicationDto.type === 'job') {
+        createApplicationDto.jobAppliedForID =
+          +createApplicationDto.jobAppliedForID;
+        this.checkIfJobExists(createApplicationDto.jobAppliedForID);
+        createApplicationDto.programPreferenceID = null;
+        existingJobApplication = await this.prisma.application.findFirst({
+          where: {
+            AND: [
+              { email: createApplicationDto.email },
+              { jobAppliedForID: +createApplicationDto.jobAppliedForID },
+            ],
+          },
+        });
+      }
+
+      if (existingJobApplication || existingProgramApplication) {
+        throw new ConflictException('This application already exist');
+      }
+
+      await this.s3Client.send(
+        new PutObjectCommand({
+          Bucket: '460624858521-nestjs-uploader',
+          Key: fileName,
+          Body: file,
+        }),
       );
+      const newApplicationDTO = { ...createApplicationDto };
+      +newApplicationDTO.programPreferenceID;
+      newApplicationDTO.resume = `${this.configService.getOrThrow(
+        'S3_BASE_URL',
+      )}/${fileName}`;
+      return this.prisma.application.create({ data: newApplicationDTO });
+    } catch (error) {
+      console.log(error);
+      throw new Error('Failed To Create Application');
     }
-
-    let existingJobApplication: Application,
-      existingProgramApplication: Application;
-
-    if (createApplicationDto.type === 'program') {
-      createApplicationDto.programPreferenceID =
-        +createApplicationDto.programPreferenceID;
-      this.checkIfProgramExists(createApplicationDto.programPreferenceID);
-      createApplicationDto.jobAppliedForID = null;
-      existingProgramApplication = await this.prisma.application.findFirst({
-        where: {
-          AND: [
-            { email: createApplicationDto.email },
-            { programPreferenceID: +createApplicationDto.programPreferenceID },
-          ],
-        },
-      });
-    }
-    if (createApplicationDto.type === 'job') {
-      createApplicationDto.jobAppliedForID =
-        +createApplicationDto.jobAppliedForID;
-      this.checkIfJobExists(createApplicationDto.jobAppliedForID);
-      createApplicationDto.programPreferenceID = null;
-      existingJobApplication = await this.prisma.application.findFirst({
-        where: {
-          AND: [
-            { email: createApplicationDto.email },
-            { jobAppliedForID: +createApplicationDto.jobAppliedForID },
-          ],
-        },
-      });
-    }
-    console.log({
-      type: typeof createApplicationDto.programPreferenceID,
-      id: createApplicationDto.programPreferenceID,
-    });
-
-    console.log(createApplicationDto);
-    console.log({ existingJobApplication, existingProgramApplication });
-    if (existingJobApplication || existingProgramApplication) {
-      throw new HttpException(
-        'This application already exist',
-        HttpStatus.CONFLICT,
-      );
-    }
-
-    await this.s3Client.send(
-      new PutObjectCommand({
-        Bucket: '460624858521-nestjs-uploader',
-        Key: fileName,
-        Body: file,
-      }),
-    );
-    const newApplicationDTO = { ...createApplicationDto };
-    +newApplicationDTO.programPreferenceID;
-    newApplicationDTO.resume = `${this.configService.getOrThrow(
-      'S3_BASE_URL',
-    )}/${fileName}`;
-    return this.prisma.application.create({ data: newApplicationDTO });
   }
 
   findAll() {
-    return this.prisma.application.findMany();
+    try {
+      return this.prisma.application.findMany();
+    } catch (error) {
+      console.log(error);
+      throw new Error('Could not get any application');
+    }
   }
 
   async findOne(id: number) {
-    await this.checkApplicationUniqueness(id);
-    return this.prisma.application.findUnique({ where: { id } });
+    try {
+      await this.checkApplicationUniqueness(id);
+      return this.prisma.application.findUnique({ where: { id } });
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
   }
 
   async update(id: number, updateApplicationDto: UpdateApplicationDto) {
-    await this.checkApplicationUniqueness(id);
-    return this.prisma.application.update({
-      where: { id },
-      data: updateApplicationDto,
-    });
+    try {
+      await this.checkApplicationUniqueness(id);
+      return this.prisma.application.update({
+        where: { id },
+        data: updateApplicationDto,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
   }
 
   async remove(id: number) {
-    await this.checkApplicationUniqueness(id);
-    return this.prisma.application.delete({ where: { id } });
+    try {
+      await this.checkApplicationUniqueness(id);
+      return this.prisma.application.delete({ where: { id } });
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
   }
 }
