@@ -1,34 +1,79 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  DefaultValuePipe,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Programs')
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
+  @ApiOperation({ summary: 'Create a new post' })
+  @ApiBody({ type: CreatePostDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Post created successfully',
+    type: Post,
+  })
+  async createPost(@Body() createPostDto: CreatePostDto) {
     return this.postsService.create(createPostDto);
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  @ApiOperation({ summary: 'get all posts' })
+  @ApiResponse({
+    status: 200,
+    type: [Post],
+  })
+  async getAllPosts(
+    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip: number,
+    @Query('take', new DefaultValuePipe(10), ParseIntPipe) take: number,
+  ) {
+    return this.postsService.findAllPost({ skip, take });
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
+  @ApiOperation({ summary: 'get a single posts' })
+  @ApiResponse({
+    status: 200,
+    type: Post,
+  })
+  async getPostById(@Param('id') id: string) {
+    return this.postsService.findOnePost({ id: +id });
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(+id, updatePostDto);
+  @Put(':id')
+  @ApiOperation({ summary: 'update a  post' })
+  @ApiResponse({
+    status: 200,
+    type: Post,
+  })
+  async updatePost(
+    @Param('id') id: string,
+    @Body() updatePostDto: UpdatePostDto,
+  ) {
+    return this.postsService.updatePost({ id: +id }, updatePostDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(+id);
+  @ApiOperation({ summary: 'delete sa post' })
+  @ApiResponse({
+    type: 'Post deleted successfully',
+  })
+  async deletePost(@Param('id') id: string): Promise<string> {
+    return this.postsService.deletePost({ id: +id });
   }
 }
