@@ -1,5 +1,6 @@
-import { IsString, IsArray, IsDateString, IsOptional, ArrayNotEmpty, ArrayUnique, IsNotEmpty } from 'class-validator';
+import { IsString, IsArray, IsDateString, IsOptional, ArrayNotEmpty, ArrayUnique, IsNotEmpty, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import ProgramType from '../enum/programType.enum';
 
 export class CreateProgramDto {
   @ApiProperty()
@@ -12,10 +13,9 @@ export class CreateProgramDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  type: string;
+  @ApiProperty({enum:ProgramType})
+  @IsEnum(ProgramType)
+  type: ProgramType;
 
   @ApiProperty()
   @IsArray()
@@ -53,12 +53,12 @@ export class CreateProgramDto {
   @IsNotEmpty()
   enrollmentInformation: string;
 
-  @ApiProperty()
+  @ApiProperty({type: 'timestamptz'})
   @IsDateString()
   @IsNotEmpty()
   startDate: Date;
 
-  @ApiProperty()
+  @ApiProperty({type: 'timestamptz'})
   @IsDateString()
   endDate: Date;
 }
@@ -74,10 +74,9 @@ export class UpdateProgramDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  type?: string;
+  @ApiProperty({enum:ProgramType})
+  @IsEnum(ProgramType)
+  type: ProgramType;
 
   @ApiProperty({ required: false })
   @IsOptional()
