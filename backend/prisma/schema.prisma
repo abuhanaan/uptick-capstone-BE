@@ -98,6 +98,17 @@ model Application {
   email                  String
   phone                  String
   address                String
+  city                   String
+  yearsOfExp             Int
+  feStack                String
+  beStack                String
+  mobileStack            String
+  otherStack             String
+  githubLink             String
+  careerGoals            String
+  portfolioLink          String
+  availabily             Boolean
+  fellowshipInfo         String
   resume                 String
   type                   String
   programPreferenceID    Int?
