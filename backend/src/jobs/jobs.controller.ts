@@ -23,6 +23,7 @@ import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -40,7 +41,32 @@ export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
   @Post()
-  @ApiBody({ type: CreateJobDto })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        description: { type: 'string' },
+        requirements: { type: 'string' },
+        applicationFormLink: { type: 'string' },
+        applicationDeadline: { type: 'string', format: 'date-time' },
+        startDate: { type: 'string', format: 'date-time' },
+        endDate: { type: 'string', format: 'date-time' },
+        file: { type: 'string', format: 'binary' },
+      },
+      required: [
+        'title',
+        'description',
+        'requirements',
+        'applicationFormLink',
+        'applicationDeadline',
+        'startDate',
+        'endDate',
+        'file',
+      ],
+    },
+  })
   @ApiCreatedResponse({ type: Job })
   @ApiInternalServerErrorResponse()
   @UsePipes(new ValidationPipe())
