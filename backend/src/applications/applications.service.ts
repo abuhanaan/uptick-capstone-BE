@@ -67,7 +67,12 @@ export class ApplicationsService {
       if (createApplicationDto.type === 'program') {
         createApplicationDto.programPreferenceID =
           +createApplicationDto.programPreferenceID;
-        this.checkIfProgramExists(createApplicationDto.programPreferenceID);
+        // this.checkIfProgramExists(createApplicationDto.programPreferenceID);
+        const id = createApplicationDto.programPreferenceID;
+        const program = await this.prisma.program.findUnique({ where: { id } });
+        if (!program) {
+          throw new NotFoundException('Program Not Found');
+        }
         createApplicationDto.jobAppliedForID = null;
         existingProgramApplication = await this.prisma.application.findFirst({
           where: {
@@ -83,7 +88,12 @@ export class ApplicationsService {
       if (createApplicationDto.type === 'job') {
         createApplicationDto.jobAppliedForID =
           +createApplicationDto.jobAppliedForID;
-        this.checkIfJobExists(createApplicationDto.jobAppliedForID);
+        // this.checkIfJobExists(createApplicationDto.jobAppliedForID);
+        const id = createApplicationDto.jobAppliedForID;
+        const job = await this.prisma.job.findUnique({ where: { id } });
+        if (!job) {
+          throw new HttpException('Job Not Found', HttpStatus.NOT_FOUND);
+        }
         createApplicationDto.programPreferenceID = null;
         existingJobApplication = await this.prisma.application.findFirst({
           where: {
@@ -108,6 +118,7 @@ export class ApplicationsService {
       );
       const newApplicationDTO = { ...createApplicationDto };
       +newApplicationDTO.programPreferenceID;
+
       newApplicationDTO.resume = `${this.configService.getOrThrow(
         'S3_BASE_URL',
       )}/${fileName}`;
@@ -128,8 +139,16 @@ export class ApplicationsService {
   }
 
   async findOne(id: number) {
+    const application = await this.prisma.application.findUnique({
+      where: { id },
+    });
+    console.log(application);
+    if (application === null) {
+      throw new NotFoundException(`Application with id ${id} Not Found`);
+    }
     try {
-      await this.checkApplicationUniqueness(id);
+      // await this.checkApplicationUniqueness(id);
+
       return this.prisma.application.findUnique({ where: { id } });
     } catch (error) {
       console.log(error);
@@ -139,7 +158,13 @@ export class ApplicationsService {
 
   async update(id: number, updateApplicationDto: UpdateApplicationDto) {
     try {
-      await this.checkApplicationUniqueness(id);
+      // await this.checkApplicationUniqueness(id);
+      const application = await this.prisma.application.findUnique({
+        where: { id },
+      });
+      if (!application) {
+        throw new NotFoundException('Application Not Found');
+      }
       return this.prisma.application.update({
         where: { id },
         data: updateApplicationDto,
@@ -152,7 +177,13 @@ export class ApplicationsService {
 
   async remove(id: number) {
     try {
-      await this.checkApplicationUniqueness(id);
+      // await this.checkApplicationUniqueness(id);
+      const application = await this.prisma.application.findUnique({
+        where: { id },
+      });
+      if (!application) {
+        throw new NotFoundException('Application Not Found');
+      }
       return this.prisma.application.delete({ where: { id } });
     } catch (error) {
       console.log(error);
