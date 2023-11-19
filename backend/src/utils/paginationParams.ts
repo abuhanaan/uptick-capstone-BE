@@ -1,5 +1,6 @@
 import { IsNumber, Min, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import ProgramType from '../programs/enum/programType.enum'
 
 export enum OrderDirection {
   ASC = 'asc',
@@ -12,9 +13,9 @@ export enum OrderBy {
 
 export  class ProgramPaginationParams {
   
-  @ApiProperty({ type: "string", required: false })
+  @ApiProperty({enum:ProgramType, required: false })
   @IsOptional()
-  type: string
+  type: ProgramType
 
   @ApiProperty({ enum: OrderBy, default: OrderBy.createdAt })
   order_by?: OrderBy = OrderBy.createdAt;

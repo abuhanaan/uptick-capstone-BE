@@ -4,6 +4,7 @@ import { Program, Prisma } from '@prisma/client';
 import { CreateProgramDto, UpdateProgramDto } from '../dto/program.dto';
 import { ProgramEntity } from '../entities/program.entity';
 import { OrderBy, OrderDirection } from '../../utils/paginationParams';
+import { response } from 'express';
 
 @Injectable()
 export class ProgramsService {
@@ -134,7 +135,7 @@ export class ProgramsService {
   async getProgramById(id: number): Promise<ProgramEntity | null> {
     try {
       const program = await this.prisma.program.findUnique({ where: { id } });
-      if (program===null) {
+      if (program==null) {
         throw new NotFoundException(`Program with ID ${id} not found`);
       }
       return new ProgramEntity(program);
@@ -143,13 +144,12 @@ export class ProgramsService {
     }
   }
 
-  async updateProgram(id: number, data: UpdateProgramDto): Promise<ProgramEntity> {
-    try {
-      const existingProgram = await this.prisma.program.findUnique({ where: { id } });
-      if (existingProgram===null) {
+  async updateProgram(id: number, data: UpdateProgramDto): Promise<ProgramEntity | null> {
+    const existingProgram = await this.prisma.program.findUnique({ where: { id } });
+      if (existingProgram==null) {
         throw new NotFoundException(`Program with ID ${id} not found`);
       }
-  
+    try {
       // Create a partial data object with only the provided fields from the DTO
       const partialData: Record<string, unknown> = {};
       for (const key in data) {
@@ -165,7 +165,6 @@ export class ProgramsService {
   
       return new ProgramEntity(updatedProgram);
     } catch (error) {
-      console.log('Error while querying the database:', error);
       throw new Error('Failed to update program');
     }
   }

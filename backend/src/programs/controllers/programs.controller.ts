@@ -1,9 +1,9 @@
-import { Controller, Get, Query, Param, Post, Body, Put, Delete, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Query, Param, Post, Body, Put, Delete } from '@nestjs/common';
 import { ProgramsService } from '../services/programs.service';
 import { CreateProgramDto, UpdateProgramDto } from '../dto/program.dto';
 import { ProgramEntity } from '../entities/program.entity';
 import { ProgramPaginationParams } from '../../utils/paginationParams';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Programs')
 @Controller('programs')
@@ -11,6 +11,7 @@ export class ProgramsController {
   constructor(private readonly programsService: ProgramsService) {}
 
   @Post('create')
+  // @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: 'Create a new program' })
   @ApiBody({ type: CreateProgramDto })
   @ApiResponse({ status: 201, description: 'Program created successfully', type: ProgramEntity })
@@ -51,17 +52,18 @@ export class ProgramsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a program by ID' })
   @ApiResponse({ status: 200, description: 'Program details', type: ProgramEntity })
-  async getProgramById(@Param('id') id: string): Promise<ProgramEntity | null> {
+  async getProgramById(@Param('id') id: number): Promise<ProgramEntity | null> {
      {
       return this.programsService.getProgramById(+id)
     }
   }
 
   @Put(':id')
+  // @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: 'Update a program by ID' })
   @ApiBody({ type: UpdateProgramDto })
   @ApiResponse({ status: 200, description: 'Program updated successfully', type: ProgramEntity })
-  async updateProgram(@Param('id') id: string, @Body() data: UpdateProgramDto): Promise<ProgramEntity> {
+  async updateProgram(@Param('id') id: number, @Body() data: UpdateProgramDto): Promise<ProgramEntity | null> {
      {
       return this.programsService.updateProgram(+id, data);
     }
@@ -70,7 +72,7 @@ export class ProgramsController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a program by ID' })
   @ApiResponse({ status: 200, description: 'Program deleted successfully', type: ProgramEntity })
-  async deleteProgram(@Param('id') id: string): Promise<string> {
+  async deleteProgram(@Param('id') id: number): Promise<string> {
     
       return this.programsService.deleteProgram(+id);
   
