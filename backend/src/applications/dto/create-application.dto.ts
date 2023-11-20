@@ -25,6 +25,50 @@ export class CreateApplicationDto {
   @ApiProperty()
   address: string;
 
+  @IsNotEmpty()
+  @ApiProperty()
+  city: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  yearsOfExp: number;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  feStack: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  beStack: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  mobileStack: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  otherStack: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  githubLink: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  careerGoals: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  portfolioLink: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  availability: Boolean;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  fellowshipInfo: string;
+
   @ApiProperty({ required: false })
   resume: string;
 

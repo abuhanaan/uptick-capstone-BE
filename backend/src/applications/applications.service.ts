@@ -11,7 +11,7 @@ import { UpdateApplicationDto } from './dto/update-application.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { Application } from '@prisma/client';
+import { Application, Job, Program } from '@prisma/client';
 
 @Injectable()
 export class ApplicationsService {
@@ -23,24 +23,19 @@ export class ApplicationsService {
     private readonly configService: ConfigService,
   ) {}
 
-  async checkApplicationUniqueness(id: number) {
-    const application = await this.prisma.application.findUnique({
-      where: { id },
-    });
+  async checkApplicationUniqueness(application: Application) {
     if (!application) {
       throw new NotFoundException('Application Not Found');
     }
   }
 
-  async checkIfProgramExists(id: number) {
-    const program = await this.prisma.program.findUnique({ where: { id } });
-    if (!program) {
+  async checkIfProgramExists(program: Program) {
+    if (program === null) {
       throw new NotFoundException('Program Not Found');
     }
   }
 
-  async checkIfJobExists(id: number) {
-    const job = await this.prisma.job.findUnique({ where: { id } });
+  async checkIfJobExists(job: Job) {
     if (!job) {
       throw new HttpException('Job Not Found', HttpStatus.NOT_FOUND);
     }
@@ -67,12 +62,10 @@ export class ApplicationsService {
       if (createApplicationDto.type === 'program') {
         createApplicationDto.programPreferenceID =
           +createApplicationDto.programPreferenceID;
-        // this.checkIfProgramExists(createApplicationDto.programPreferenceID);
         const id = createApplicationDto.programPreferenceID;
         const program = await this.prisma.program.findUnique({ where: { id } });
-        if (!program) {
-          throw new NotFoundException('Program Not Found');
-        }
+        this.checkIfProgramExists(program);
+
         createApplicationDto.jobAppliedForID = null;
         existingProgramApplication = await this.prisma.application.findFirst({
           where: {
@@ -88,12 +81,10 @@ export class ApplicationsService {
       if (createApplicationDto.type === 'job') {
         createApplicationDto.jobAppliedForID =
           +createApplicationDto.jobAppliedForID;
-        // this.checkIfJobExists(createApplicationDto.jobAppliedForID);
         const id = createApplicationDto.jobAppliedForID;
         const job = await this.prisma.job.findUnique({ where: { id } });
-        if (!job) {
-          throw new HttpException('Job Not Found', HttpStatus.NOT_FOUND);
-        }
+        this.checkIfJobExists(job);
+
         createApplicationDto.programPreferenceID = null;
         existingJobApplication = await this.prisma.application.findFirst({
           where: {
@@ -122,6 +113,7 @@ export class ApplicationsService {
       newApplicationDTO.resume = `${this.configService.getOrThrow(
         'S3_BASE_URL',
       )}/${fileName}`;
+
       return this.prisma.application.create({ data: newApplicationDTO });
     } catch (error) {
       console.log(error);
@@ -142,13 +134,9 @@ export class ApplicationsService {
     const application = await this.prisma.application.findUnique({
       where: { id },
     });
-    console.log(application);
-    if (application === null) {
-      throw new NotFoundException(`Application with id ${id} Not Found`);
-    }
-    try {
-      // await this.checkApplicationUniqueness(id);
 
+    await this.checkApplicationUniqueness(application);
+    try {
       return this.prisma.application.findUnique({ where: { id } });
     } catch (error) {
       console.log(error);
@@ -157,14 +145,12 @@ export class ApplicationsService {
   }
 
   async update(id: number, updateApplicationDto: UpdateApplicationDto) {
+    const application = await this.prisma.application.findUnique({
+      where: { id },
+    });
+
+    await this.checkApplicationUniqueness(application);
     try {
-      // await this.checkApplicationUniqueness(id);
-      const application = await this.prisma.application.findUnique({
-        where: { id },
-      });
-      if (!application) {
-        throw new NotFoundException('Application Not Found');
-      }
       return this.prisma.application.update({
         where: { id },
         data: updateApplicationDto,
@@ -176,14 +162,12 @@ export class ApplicationsService {
   }
 
   async remove(id: number) {
+    const application = await this.prisma.application.findUnique({
+      where: { id },
+    });
+
+    await this.checkApplicationUniqueness(application);
     try {
-      // await this.checkApplicationUniqueness(id);
-      const application = await this.prisma.application.findUnique({
-        where: { id },
-      });
-      if (!application) {
-        throw new NotFoundException('Application Not Found');
-      }
       return this.prisma.application.delete({ where: { id } });
     } catch (error) {
       console.log(error);
