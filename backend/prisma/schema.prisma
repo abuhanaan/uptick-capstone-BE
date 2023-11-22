@@ -61,13 +61,12 @@ model Job {
   applicationFormLink  String
   companyLogo          String
   applicationDeadline  DateTime
-  startDate            DateTime
+  startDate            DateTime 
   endDate              DateTime
+
+  Applications         Application[]
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
-
-  applicant             Application?  @relation(fields: [applicantId], references: [id])
-  applicantId           Int?
 }
 
 model Program {
@@ -84,11 +83,10 @@ model Program {
   enrollmentInformation  String
   startDate              DateTime
   endDate                DateTime
+
+  Applications           Application[]
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
-
-  applicant             Application?  @relation(fields: [applicantId], references: [id])
-  applicantId           Int?
 }
 
 model Application {
@@ -99,7 +97,7 @@ model Application {
   phone                  String
   address                String
   city                   String
-  yearsOfExp             Int
+  yearsOfExp             String
   feStack                String
   beStack                String
   mobileStack            String
@@ -107,7 +105,7 @@ model Application {
   githubLink             String
   careerGoals            String
   portfolioLink          String
-  availabily             Boolean
+  availability           String
   fellowshipInfo         String
   resume                 String
   type                   String
@@ -115,10 +113,10 @@ model Application {
   jobAppliedForID        Int?
   applicationDate        DateTime  @default(now())
   status                 String
+
+  Program              Program?   @relation(fields: [programPreferenceID], references: [id])
+  Job                  Job?       @relation(fields: [jobAppliedForID], references: [id])
+
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
-
-  programs               Program[]
-  jobs                   Job[]
 }
-

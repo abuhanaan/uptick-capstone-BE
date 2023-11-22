@@ -133,7 +133,7 @@ export class JobsController {
     description: `The requested job doesn't exist on this server`,
   })
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Job> {
+  findOne(@Param('id') id: string): Promise<Object> {
     return this.jobsService.findOne(+id);
   }
 

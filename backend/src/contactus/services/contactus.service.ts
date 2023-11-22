@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateContactusDto } from './dto/create-contactus.dto';
-import { UpdateContactusDto } from './dto/update-contactus.dto';
+import { CreateContactusDto } from '../dto/create-contactus.dto';
+import { UpdateContactusDto } from '../dto/update-contactus.dto';
 
 @Injectable()
 export class ContactusService {

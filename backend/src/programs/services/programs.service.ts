@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Program, Prisma } from '@prisma/client';
 import { CreateProgramDto, UpdateProgramDto } from '../dto/program.dto';
 import { ProgramEntity } from '../entities/program.entity';
 import { OrderBy, OrderDirection } from '../../utils/paginationParams';
-import { response } from 'express';
 
 @Injectable()
 export class ProgramsService {
@@ -132,13 +130,17 @@ export class ProgramsService {
   
   
 
-  async getProgramById(id: number): Promise<ProgramEntity | null> {
+  async getProgramById(id: number): Promise<Object | null> {
     try {
-      const program = await this.prisma.program.findUnique({ where: { id } });
+      const program = await this.prisma.program.findUnique({ where: { id }});
+      const applications = await this.prisma.application.findMany({ where: { programPreferenceID:id }});
       if (program==null) {
         throw new NotFoundException(`Program with ID ${id} not found`);
       }
-      return new ProgramEntity(program);
+      return {
+        program,
+        applications,
+      };
     } catch (error) {
       throw error;
     }

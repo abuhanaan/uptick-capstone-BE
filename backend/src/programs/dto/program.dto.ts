@@ -17,20 +17,17 @@ export class CreateProgramDto {
   @IsEnum(ProgramType)
   type: ProgramType;
 
-  @ApiProperty()
+  @ApiProperty({required:false})
   @IsArray()
-  @ArrayNotEmpty()
   @ArrayUnique()
   curriculumOutline: string[];
 
-  @ApiProperty()
+  @ApiProperty({required:false})
   @IsString()
-  @IsNotEmpty()
   objectives: string;
 
-  @ApiProperty()
+  @ApiProperty({required:false})
   @IsString()
-  @IsNotEmpty()
   benefits: string;
 
   @ApiProperty()
@@ -53,12 +50,11 @@ export class CreateProgramDto {
   @IsNotEmpty()
   enrollmentInformation: string;
 
-  @ApiProperty({type: 'timestamptz'})
+  @ApiProperty({})
   @IsDateString()
-  @IsNotEmpty()
   startDate: Date;
 
-  @ApiProperty({type: 'timestamptz'})
+  @ApiProperty({})
   @IsDateString()
   endDate: Date;
 }
@@ -120,7 +116,7 @@ export class UpdateProgramDto {
   @IsDateString()
   startDate?: Date;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false})
   @IsOptional()
   @IsDateString()
   endDate?: Date;

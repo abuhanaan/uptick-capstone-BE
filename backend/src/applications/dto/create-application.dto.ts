@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { File } from 'buffer';
-import { IsEmail, IsIn, IsNotEmpty, IsPhoneNumber } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, IsNumber, IsPhoneNumber } from 'class-validator';
+enum EntityType {
+  Job = 'job',
+  Program = 'program',
+}
 
 export class CreateApplicationDto {
   @IsNotEmpty()
@@ -29,24 +33,21 @@ export class CreateApplicationDto {
   @ApiProperty()
   city: string;
 
-  @IsNotEmpty()
-  @ApiProperty()
-  yearsOfExp: number;
+  // @IsNotEmpty()
+  // @IsNumber()
+  @ApiProperty({required:false})
+  yearsOfExp: string;
 
-  @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   feStack: string;
 
-  @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   beStack: string;
 
-  @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   mobileStack: string;
 
-  @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   otherStack: string;
 
   @IsNotEmpty()
@@ -57,16 +58,14 @@ export class CreateApplicationDto {
   @ApiProperty()
   careerGoals: string;
 
-  @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   portfolioLink: string;
 
   @IsNotEmpty()
-  @ApiProperty()
-  availability: Boolean;
+  @ApiProperty({})
+  availability: string;
 
-  @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   fellowshipInfo: string;
 
   @ApiProperty({ required: false })
@@ -85,11 +84,11 @@ export class CreateApplicationDto {
   @ApiProperty({ required: false })
   jobAppliedForID: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false,default:"pending" })
   status: string = 'pending';
 
   @IsNotEmpty()
-  @IsIn(['job', 'program'])
-  @ApiProperty()
+  @ApiProperty({enum: EntityType,
+    default: EntityType.Program})
   type: string;
 }

@@ -76,14 +76,15 @@ export class JobsService {
     return jobs;
   }
 
-  async findOne(id: number): Promise<Job> {
+  async findOne(id: number): Promise<Object> {
     const job = await this.prisma.job.findUnique({ where: { id } });
+    const applications = await this.prisma.application.findMany({ where: { jobAppliedForID:id }});
     if (!job) {
       throw new NotFoundException(
         `The requested job doesn't exist on this server`,
       );
     }
-    return job;
+    return {job,applications};
   }
 
   async update(id: number, data: Partial<Job>): Promise<Job> {

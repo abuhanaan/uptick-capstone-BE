@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ContactusService } from './contactus.service';
-import { CreateContactusDto } from './dto/create-contactus.dto';
-import { UpdateContactusDto } from './dto/update-contactus.dto';
+import { ContactusService } from '../services/contactus.service';
+import { CreateContactusDto } from '../dto/create-contactus.dto';
+import { UpdateContactusDto } from '../dto/update-contactus.dto';
 
 @Controller('contactus')
 export class ContactusController {

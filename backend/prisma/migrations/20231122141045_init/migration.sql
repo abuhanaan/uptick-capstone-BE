@@ -56,12 +56,11 @@ CREATE TABLE "Job" (
     "requirements" TEXT NOT NULL,
     "applicationFormLink" TEXT NOT NULL,
     "companyLogo" TEXT NOT NULL,
-    "applicationDeadline" TIMESTAMP(3) NOT NULL,
-    "startDate" TIMESTAMP(3) NOT NULL,
-    "endDate" TIMESTAMP(3) NOT NULL,
+    "applicationDeadline" TEXT NOT NULL,
+    "startDate" TEXT NOT NULL,
+    "endDate" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "applicantId" INTEGER,
 
     CONSTRAINT "Job_pkey" PRIMARY KEY ("id")
 );
@@ -79,11 +78,10 @@ CREATE TABLE "Program" (
     "duration" TEXT NOT NULL,
     "applicationFormLink" TEXT NOT NULL,
     "enrollmentInformation" TEXT NOT NULL,
-    "startDate" TIMESTAMP(3) NOT NULL,
-    "endDate" TIMESTAMP(3) NOT NULL,
+    "startDate" TEXT NOT NULL,
+    "endDate" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "applicantId" INTEGER,
 
     CONSTRAINT "Program_pkey" PRIMARY KEY ("id")
 );
@@ -96,9 +94,21 @@ CREATE TABLE "Application" (
     "email" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
     "address" TEXT NOT NULL,
+    "city" TEXT NOT NULL,
+    "yearsOfExp" TEXT NOT NULL,
+    "feStack" TEXT NOT NULL,
+    "beStack" TEXT NOT NULL,
+    "mobileStack" TEXT NOT NULL,
+    "otherStack" TEXT NOT NULL,
+    "githubLink" TEXT NOT NULL,
+    "careerGoals" TEXT NOT NULL,
+    "portfolioLink" TEXT NOT NULL,
+    "availability" TEXT NOT NULL,
+    "fellowshipInfo" TEXT NOT NULL,
     "resume" TEXT NOT NULL,
-    "programPreferenceID" TEXT NOT NULL,
-    "jobAppliedForID" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "programPreferenceID" INTEGER,
+    "jobAppliedForID" INTEGER,
     "applicationDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "status" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -123,10 +133,10 @@ CREATE UNIQUE INDEX "_PostToTag_AB_unique" ON "_PostToTag"("A", "B");
 CREATE INDEX "_PostToTag_B_index" ON "_PostToTag"("B");
 
 -- AddForeignKey
-ALTER TABLE "Job" ADD CONSTRAINT "Job_applicantId_fkey" FOREIGN KEY ("applicantId") REFERENCES "Application"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Application" ADD CONSTRAINT "Application_programPreferenceID_fkey" FOREIGN KEY ("programPreferenceID") REFERENCES "Program"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Program" ADD CONSTRAINT "Program_applicantId_fkey" FOREIGN KEY ("applicantId") REFERENCES "Application"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Application" ADD CONSTRAINT "Application_jobAppliedForID_fkey" FOREIGN KEY ("jobAppliedForID") REFERENCES "Job"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_PostToTag" ADD CONSTRAINT "_PostToTag_A_fkey" FOREIGN KEY ("A") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;

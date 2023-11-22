@@ -12,6 +12,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Application, Job, Program } from '@prisma/client';
+import { ProgramsService } from 'src/programs/services/programs.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -114,7 +115,8 @@ export class ApplicationsService {
         'S3_BASE_URL',
       )}/${fileName}`;
 
-      return this.prisma.application.create({ data: newApplicationDTO });
+       return this.prisma.application.create({ data: newApplicationDTO });
+
     } catch (error) {
       console.log(error);
       throw new Error('Failed To Create Application');
