@@ -11,6 +11,7 @@ export class ProgramsController {
   constructor(private readonly programsService: ProgramsService) {}
 
   @Post('create')
+  // @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: 'Create a new program' })
   @ApiBody({ type: CreateProgramDto })
   @ApiResponse({ status: 201, description: 'Program created successfully', type: ProgramEntity })
@@ -56,8 +57,9 @@ export class ProgramsController {
       return this.programsService.getProgramById(+id)
     }
   }
-
+  
   @Put(':id')
+  // @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: 'Update a program by ID' })
   @ApiBody({ type: UpdateProgramDto })
   @ApiResponse({ status: 200, description: 'Program updated successfully', type: ProgramEntity })
