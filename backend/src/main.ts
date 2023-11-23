@@ -20,6 +20,7 @@ async function bootstrap() {
     .setTitle('Uptick Fellowship - Team A')
     .setDescription('The Capstone Project API description')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
