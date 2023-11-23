@@ -50,7 +50,7 @@ export class CreateProgramDto {
   @IsNotEmpty()
   enrollmentInformation: string;
 
-  @ApiProperty({})
+@ApiProperty({})
   @IsDateString()
   startDate: Date;
 
