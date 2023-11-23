@@ -1,9 +1,10 @@
-import { Controller, Get, Query, Param, Post, Body, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Query, Param, Post, Body, Put, Delete, UseGuards } from '@nestjs/common';
 import { ProgramsService } from '../services/programs.service';
 import { CreateProgramDto, UpdateProgramDto } from '../dto/program.dto';
 import { ProgramEntity } from '../entities/program.entity';
 import { ProgramPaginationParams } from '../../utils/paginationParams';
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Programs')
 @Controller('programs')
@@ -11,10 +12,11 @@ export class ProgramsController {
   constructor(private readonly programsService: ProgramsService) {}
 
   @Post('create')
-  // @ApiConsumes("multipart/form-data")
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a new program' })
   @ApiBody({ type: CreateProgramDto })
   @ApiResponse({ status: 201, description: 'Program created successfully', type: ProgramEntity })
+  @ApiBearerAuth()
   async createProgram(@Body() data: CreateProgramDto): Promise<ProgramEntity> {
       return await this.programsService.createProgram(data); 
   }
@@ -59,9 +61,10 @@ export class ProgramsController {
   }
   
   @Put(':id')
-  // @ApiConsumes("multipart/form-data")
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update a program by ID' })
   @ApiBody({ type: UpdateProgramDto })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Program updated successfully', type: ProgramEntity })
   async updateProgram(@Param('id') id: number, @Body() data: UpdateProgramDto): Promise<ProgramEntity | null> {
      {
@@ -70,8 +73,10 @@ export class ProgramsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Delete a program by ID' })
   @ApiResponse({ status: 200, description: 'Program deleted successfully', type: ProgramEntity })
+  @ApiBearerAuth()
   async deleteProgram(@Param('id') id: number): Promise<string> {
     
       return this.programsService.deleteProgram(+id);
