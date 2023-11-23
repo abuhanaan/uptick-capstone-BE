@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ContactusService } from './services/contactus.service';
-import { ContactusController } from './controllers/contactus.controller';
+import { EmailService } from './services/contactus.service';
+import { ContactController } from './controllers/contactus.controller';
+import {SendGridService} from '../utils/sendgrid.service'
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
-  controllers: [ContactusController],
-  providers: [ContactusService],
+  controllers: [ContactController],
+  providers: [EmailService,SendGridService],
+  imports: [PrismaModule],
 })
 export class ContactusModule {}

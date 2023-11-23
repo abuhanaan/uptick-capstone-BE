@@ -1,26 +1,59 @@
 import { Injectable } from '@nestjs/common';
-import { CreateContactusDto } from '../dto/create-contactus.dto';
-import { UpdateContactusDto } from '../dto/update-contactus.dto';
+import { PrismaService } from '../../prisma/prisma.service';
+import { SendGridService } from '../../utils/sendgrid.service';
+import { CreateContactDto } from '../dto/createContactUs.dto';
+import { Contact } from '@prisma/client';
 
 @Injectable()
-export class ContactusService {
-  create(createContactusDto: CreateContactusDto) {
-    return 'This action adds a new contactus';
+export class EmailService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly sendGridService: SendGridService,
+  ) {}
+
+  async sendEmail(contactData: CreateContactDto): Promise<Object> {
+    const { name, email, phone, message, subject } = contactData;
+
+    const sentContact = await this.prisma.contact.create({
+      data: { name, email, phone, message, subject, received: false },
+    });
+    if(!sentContact){
+      return "Network error please try again"
+    }
+    await this.sendGridService.sendEmail(contactData);
+
+    return sentContact;
   }
 
-  findAll() {
-    return `This action returns all contactus`;
+  async receiveEmail(contactData: CreateContactDto): Promise<Object> {
+    const { name, email, phone, message, subject } = contactData;
+
+    const sentContact = await this.prisma.contact.create({
+      data: { name, email, phone, message, subject, received: true },
+    });
+    if(!sentContact){
+      return "Network error please try again"
+    }
+    await this.sendGridService.sendEmail(contactData);
+    await this.sendGridService.resEmail(email, { name, message });
+    return
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} contactus`;
+  async getAllReceivedEmails(subject?: string): Promise<Contact[]> {
+    return this.prisma.contact.findMany({
+      where: { received: true, subject: subject || undefined },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  update(id: number, updateContactusDto: UpdateContactusDto) {
-    return `This action updates a #${id} contactus`;
+  async getEmailById(id: number): Promise<Contact | null> {
+    return this.prisma.contact.findUnique({ where: { id } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contactus`;
+  async getAllSentEmails(subject?: string): Promise<Contact[]> {
+    return this.prisma.contact.findMany({
+      where: { received: false, subject: subject || undefined },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }

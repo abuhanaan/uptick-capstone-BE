@@ -1,34 +1,38 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ContactusService } from '../services/contactus.service';
-import { CreateContactusDto } from '../dto/create-contactus.dto';
-import { UpdateContactusDto } from '../dto/update-contactus.dto';
+import { Body, Controller, Get, Param, Post, Query, ValidationPipe } from '@nestjs/common';
+import { EmailService } from '../services/contactus.service';
+import { CreateContactDto } from '../dto/createContactUs.dto';
+import { Contact } from '@prisma/client';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
-@Controller('contactus')
-export class ContactusController {
-  constructor(private readonly contactusService: ContactusService) {}
+@ApiTags('Contact Us')
+@Controller('contact')
+export class ContactController {
+  constructor(private readonly emailService: EmailService) {}
 
-  @Post()
-  create(@Body() createContactusDto: CreateContactusDto) {
-    return this.contactusService.create(createContactusDto);
+  @Post('admin/send')
+  async sendEmail(@Body(new ValidationPipe()) contactData: CreateContactDto): Promise<Object> {
+    return this.emailService.sendEmail(contactData);
   }
 
-  @Get()
-  findAll() {
-    return this.contactusService.findAll();
+  @Post('users/send')
+  async receiveEmail(@Body(new ValidationPipe()) contactData: CreateContactDto): Promise<Object> {
+    return this.emailService.receiveEmail(contactData);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.contactusService.findOne(+id);
+  @Get('received')
+  @ApiQuery({ name: 'subject', required: false })
+  async getAllReceivedEmails(@Query('subject') subject?: string): Promise<Contact[]> {
+    return this.emailService.getAllReceivedEmails(subject || undefined);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateContactusDto: UpdateContactusDto) {
-    return this.contactusService.update(+id, updateContactusDto);
+  @Get('sent')
+  @ApiQuery({ name: 'subject', required: false })
+  async getAllSentEmails(@Query('subject') subject?: string): Promise<Contact[]> {
+    return this.emailService.getAllSentEmails(subject || undefined);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.contactusService.remove(+id);
+  @Get('email/:id')
+  async getEmailById(@Param('id') id: number): Promise<Contact | null> {
+    return this.emailService.getEmailById(+id);
   }
 }
