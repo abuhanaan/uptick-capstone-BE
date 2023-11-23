@@ -10,6 +10,7 @@ import { TagsModule } from './tags/tags.module';
 import { ContactusModule } from './contactus/contactus.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ConfigModule } from '@nestjs/config';
     ContactusModule,
     ApplicationsModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
