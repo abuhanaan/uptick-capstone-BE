@@ -103,7 +103,7 @@ export class ApplicationsService {
 
       await this.s3Client.send(
         new PutObjectCommand({
-          Bucket: '460624858521-nestjs-uploader',
+          Bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
           Key: fileName,
           Body: file,
         }),
@@ -115,8 +115,7 @@ export class ApplicationsService {
         'S3_BASE_URL',
       )}/${fileName}`;
 
-       return this.prisma.application.create({ data: newApplicationDTO });
-
+      return this.prisma.application.create({ data: newApplicationDTO });
     } catch (error) {
       console.log(error);
       throw new Error('Failed To Create Application');
