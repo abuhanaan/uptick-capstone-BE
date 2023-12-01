@@ -37,22 +37,14 @@ model Post {
   title            String
   content          String
   author           String
+  image            String
+  tags             String[]
+  published        Boolean  @default(false)
   publicationDate  DateTime  @default(now())
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
-
-  tags             Tag[]
 }
 
-model Tag {
-  id               Int       @id @default(autoincrement())
-  name             String
-  description      String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  posts            Post[]
-}
 
 model Job {
   id                   Int       @id @default(autoincrement())

@@ -1,26 +1,72 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, Post } from '@prisma/client';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { ConfigService } from '@nestjs/config';
+import { CreatePostDto } from './dto/create-post.dto';
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  private readonly s3Client = new S3Client({
+    region: this.configService.getOrThrow('AWS_S3_REGION'),
+  });
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  async create(createPostDto: Prisma.PostCreateInput): Promise<Post> {
+  async create(
+    createPostDto: CreatePostDto,
+    fileName: string,
+    file: Buffer,
+  ): Promise<Post> {
     try {
+      const existingPost = await this.prismaService.post.findFirst({
+        where: { title: createPostDto.title },
+      });
+
+      if (existingPost) {
+        throw new ConflictException(
+          `Post with title ${createPostDto.title} already exist`,
+        );
+      }
+      await this.s3Client.send(
+        new PutObjectCommand({
+          Bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
+          Key: fileName,
+          Body: file,
+        }),
+      );
+      createPostDto.image = `${this.configService.getOrThrow(
+        'S3_BASE_URL',
+      )}/${fileName}`;
       const createdPost = await this.prismaService.post.create({
         data: {
           author: createPostDto.author,
           title: createPostDto.title,
           content: createPostDto.content,
+          image: createPostDto.image,
+          published: createPostDto.published,
+          publicationDate: createPostDto.publicationDate,
         },
       });
       return createdPost;
     } catch (error) {
-      throw new HttpException(
-        'Failed to create the post',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      console.error('Original error:', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      } else if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to create the post');
     }
   }
 
@@ -34,14 +80,15 @@ export class PostsService {
       });
 
       if (!posts) {
-        throw new HttpException('No posts found', HttpStatus.NOT_FOUND);
+        throw new NotFoundException('No posts found');
       }
       return posts;
     } catch (error) {
-      throw new HttpException(
-        'Failed to fetch posts',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      console.error('Original error:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to fetch posts');
     }
   }
 
@@ -50,15 +97,52 @@ export class PostsService {
       const post = await this.prismaService.post.findUnique({ where });
 
       if (!post) {
-        throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+        throw new NotFoundException('Post not found');
       }
 
       return post;
     } catch (error) {
-      throw new HttpException(
-        'Failed to fetch the post',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      console.error('Original error:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to fetch the post');
+    }
+  }
+
+  async getPublishedPosts() {
+    try {
+      const publishedPosts = await this.prismaService.post.findMany({
+        where: { published: true },
+      });
+      if (publishedPosts.length == 0) {
+        throw new NotFoundException('No published posts found');
+      }
+      return publishedPosts;
+    } catch (error) {
+      console.error('Original error:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to fetch published posts');
+    }
+  }
+
+  async getDraftPosts() {
+    try {
+      const drafts = await this.prismaService.post.findMany({
+        where: { published: false },
+      });
+      if (drafts.length == 0) {
+        throw new NotFoundException('There is no post in drafts');
+      }
+      return drafts;
+    } catch (error) {
+      console.error('Original error:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to fetch draft posts');
     }
   }
 
@@ -73,15 +157,16 @@ export class PostsService {
       });
 
       if (!post) {
-        throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+        throw new NotFoundException('Post not found');
       }
 
       return post;
     } catch (error) {
-      throw new HttpException(
-        'Failed to update the post',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      console.error('Original error:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update the post');
     }
   }
 
@@ -90,14 +175,15 @@ export class PostsService {
       const post = await this.prismaService.post.delete({ where });
 
       if (!post) {
-        throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+        throw new NotFoundException('Post not found');
       }
       return 'Post deleted successfully...';
     } catch (error) {
-      throw new HttpException(
-        'Failed to delete the post',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      console.error('Original error:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to delete the post');
     }
   }
 }

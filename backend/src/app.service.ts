@@ -67,11 +67,10 @@ export class AppService {
       take: 3,
     });
 
-    const recentJobApplicants = await this.prisma.application.findMany({
-      where: { type: 'job' },
+    const recentJobs = await this.prisma.job.findMany({
       orderBy: { createdAt: 'desc' },
       take: 3,
     });
-    return { stats, recentApplicants, recentJobApplicants };
+    return { stats, recentApplicants, recentJobs };
   }
 }

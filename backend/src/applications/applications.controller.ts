@@ -13,9 +13,6 @@ import {
   UsePipes,
   ValidationPipe,
   UseGuards,
-  BadRequestException,
-  ConflictException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
