@@ -17,9 +17,10 @@ CREATE TABLE "Contact" (
     "email" TEXT NOT NULL,
     "phone" TEXT,
     "message" TEXT NOT NULL,
+    "subject" TEXT NOT NULL,
+    "received" BOOLEAN NOT NULL DEFAULT false,
     "dateSubmitted" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Contact_pkey" PRIMARY KEY ("id")
 );
@@ -56,9 +57,9 @@ CREATE TABLE "Job" (
     "requirements" TEXT NOT NULL,
     "applicationFormLink" TEXT NOT NULL,
     "companyLogo" TEXT NOT NULL,
-    "applicationDeadline" TEXT NOT NULL,
-    "startDate" TEXT NOT NULL,
-    "endDate" TEXT NOT NULL,
+    "applicationDeadline" TIMESTAMP(3) NOT NULL,
+    "startDate" TIMESTAMP(3) NOT NULL,
+    "endDate" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -78,8 +79,8 @@ CREATE TABLE "Program" (
     "duration" TEXT NOT NULL,
     "applicationFormLink" TEXT NOT NULL,
     "enrollmentInformation" TEXT NOT NULL,
-    "startDate" TEXT NOT NULL,
-    "endDate" TEXT NOT NULL,
+    "startDate" TIMESTAMP(3) NOT NULL,
+    "endDate" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

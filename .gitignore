@@ -1,1 +1,3 @@
 .vscode
+/backend/deployment-script.sh
+/backend/.env

@@ -15,6 +15,7 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
+  UseGuards,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -22,6 +23,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
@@ -34,6 +36,7 @@ import {
 } from '@nestjs/swagger';
 import { Job } from './entities/job.entity';
 import { FilterJobsDto } from './dto/get-all-jobs-filter.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -41,6 +44,8 @@ export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -84,6 +89,8 @@ export class JobsController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
   @ApiQuery({ name: 'title', required: false, type: String })
@@ -114,6 +121,8 @@ export class JobsController {
   }
 
   @Get('closed')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
   @ApiOkResponse({ type: Job, isArray: true })
@@ -143,6 +152,8 @@ export class JobsController {
     description: `Job with ID doesn't exist on this server!`,
   })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -151,6 +162,8 @@ export class JobsController {
     return this.jobsService.update(+id, updateJobDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Delete(':id')
   @ApiParam({ name: 'id', type: Number, description: 'Job ID', required: true })
   @ApiNotFoundResponse({

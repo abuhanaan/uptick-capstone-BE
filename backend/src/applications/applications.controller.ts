@@ -13,6 +13,9 @@ import {
   UsePipes,
   ValidationPipe,
   UseGuards,
+  BadRequestException,
+  ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -20,26 +23,36 @@ import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CreateJobApplicationDto } from './dto/create-job-application.dto';
 
 @Controller('applications')
 @ApiTags('applications')
 export class ApplicationsController {
   constructor(private readonly applicationsService: ApplicationsService) {}
 
-  @Post()
+  @Post('/job')
   @ApiConsumes('multipart/form-data')
   @UsePipes(new ValidationPipe())
   @UseInterceptors(FileInterceptor('file'))
-  create(
-    @Body() createApplicationDto: CreateApplicationDto,
+  createJobApplication(
+    @Body() createJobApplicationDto: CreateJobApplicationDto,
     @UploadedFile(new ParseFilePipe({ validators: [] }))
     file: Express.Multer.File,
   ) {
-    return this.applicationsService.create(
-      createApplicationDto,
+    return this.applicationsService.createJobApplication(
+      createJobApplicationDto,
       file.originalname,
       file.buffer,
     );
+  }
+
+  @Post('/program')
+  @ApiConsumes('multipart/form-data')
+  @UsePipes(new ValidationPipe())
+  create(@Body() createApplicationDto: CreateApplicationDto) {
+    console.log('service controller');
+
+    return this.applicationsService.create(createApplicationDto);
   }
 
   @Get()

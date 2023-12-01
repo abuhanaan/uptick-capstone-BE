@@ -13,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Application, Job, Program } from '@prisma/client';
 import { ProgramsService } from 'src/programs/services/programs.service';
+import { CreateJobApplicationDto } from './dto/create-job-application.dto';
 
 @Injectable()
 export class ApplicationsService {
@@ -38,12 +39,12 @@ export class ApplicationsService {
 
   async checkIfJobExists(job: Job) {
     if (!job) {
-      throw new HttpException('Job Not Found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException('Job Not Found');
     }
   }
 
-  async create(
-    createApplicationDto: CreateApplicationDto,
+  async createJobApplication(
+    createApplicationDto: CreateJobApplicationDto,
     fileName: string,
     file: Buffer,
   ) {
@@ -117,8 +118,80 @@ export class ApplicationsService {
 
       return this.prisma.application.create({ data: newApplicationDTO });
     } catch (error) {
-      console.log(error);
+      console.error('Original error:', error);
+      if (error instanceof BadRequestException) {
+        // console.log('Custom log message for BadRequestException');
+        // Rethrow the exception to propagate the original status to the client
+        throw error;
+      } else if (error instanceof ConflictException) {
+        // console.log('Custom log message for ConflictException');
+        // Rethrow the exception to propagate the original status to the client
+        throw error;
+      } else if (error instanceof NotFoundException) {
+        // console.log('Custom log message for ConflictException');
+        // Rethrow the exception to propagate the original status to the client
+        throw error;
+      }
       throw new Error('Failed To Create Application');
+    }
+  }
+
+  async create(createApplicationDto: CreateApplicationDto) {
+    console.log('service program');
+    try {
+      if (
+        createApplicationDto.programPreferenceID &&
+        createApplicationDto.jobAppliedForID
+      ) {
+        throw new BadRequestException(
+          'You can only apply for one application type',
+        );
+      }
+
+      let existingProgramApplication: Application;
+
+      if (createApplicationDto.type === 'program') {
+        // createApplicationDto.programPreferenceID =
+        //   +createApplicationDto.programPreferenceID;
+        const id = createApplicationDto.programPreferenceID;
+        const program = await this.prisma.program.findUnique({ where: { id } });
+        this.checkIfProgramExists(program);
+
+        createApplicationDto.jobAppliedForID = null;
+        existingProgramApplication = await this.prisma.application.findFirst({
+          where: {
+            AND: [
+              { email: createApplicationDto.email },
+              {
+                programPreferenceID: +createApplicationDto.programPreferenceID,
+              },
+            ],
+          },
+        });
+      }
+
+      if (existingProgramApplication) {
+        throw new ConflictException('This application already exist');
+      }
+      return this.prisma.application.create({
+        data: createApplicationDto as any,
+      });
+    } catch (error) {
+      console.error('Original error:', error);
+      if (error instanceof BadRequestException) {
+        // console.log('Custom log message for BadRequestException');
+        // Rethrow the exception to propagate the original status to the client
+        throw error;
+      } else if (error instanceof ConflictException) {
+        // console.log('Custom log message for ConflictException');
+        // Rethrow the exception to propagate the original status to the client
+        throw error;
+      } else if (error instanceof NotFoundException) {
+        // console.log('Custom log message for ConflictException');
+        // Rethrow the exception to propagate the original status to the client
+        throw error;
+      }
+      throw new Error('Failed To Create Program Application');
     }
   }
 
