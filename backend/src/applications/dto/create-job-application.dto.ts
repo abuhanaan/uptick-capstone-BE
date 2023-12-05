@@ -80,9 +80,8 @@ export class CreateJobApplicationDto {
   @ApiProperty({
     type: 'string',
     format: 'binary',
-    required: false,
+    required: true,
   })
-  @ApiProperty({ required: true })
   file: File;
 
   @ApiProperty({ required: false })
