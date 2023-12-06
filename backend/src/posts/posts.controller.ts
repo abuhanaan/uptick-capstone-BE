@@ -61,11 +61,30 @@ export class PostsController {
     status: 200,
     type: [Post],
   })
-  async getAllPosts(
-    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip: number,
-    @Query('take', new DefaultValuePipe(10), ParseIntPipe) take: number,
-  ) {
-    return this.postsService.findAllPost({ skip, take });
+  async getAllPosts(@Query() { tag }) {
+    return this.postsService.findAllPost(tag);
+  }
+
+  @Get('/published')
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    type: [Post],
+  })
+  @ApiBearerAuth()
+  async getPublishedPosts() {
+    return this.postsService.getPublishedPosts();
+  }
+
+  @Get('/drafts')
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    type: [Post],
+  })
+  @ApiBearerAuth()
+  async getDraftPosts() {
+    return this.postsService.getDraftPosts();
   }
 
   @Get(':id')
@@ -74,22 +93,8 @@ export class PostsController {
     status: 200,
     type: Post,
   })
-  async getPostById(@Param('id') id: string) {
-    return this.postsService.findOnePost({ id: +id });
-  }
-
-  @Get('/published')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  async getPublishedPosts() {
-    return this.postsService.getPublishedPosts();
-  }
-
-  @Get('/drafts')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  async getDraftPosts() {
-    return this.postsService.getDraftPosts();
+  async getPostById(@Param('id', ParseIntPipe) id: number) {
+    return this.postsService.findOnePost(id);
   }
 
   @Put(':id')
@@ -101,10 +106,10 @@ export class PostsController {
     type: Post,
   })
   async updatePost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
   ) {
-    return this.postsService.updatePost({ id: +id }, updatePostDto);
+    return this.postsService.updatePost(id, updatePostDto);
   }
 
   @Delete(':id')
@@ -114,7 +119,7 @@ export class PostsController {
   @ApiResponse({
     type: 'Post deleted successfully',
   })
-  async deletePost(@Param('id') id: string): Promise<string> {
-    return this.postsService.deletePost({ id: +id });
+  async deletePost(@Param('id', ParseIntPipe) id: number): Promise<string> {
+    return this.postsService.deletePost(id);
   }
 }

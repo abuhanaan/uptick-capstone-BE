@@ -74,7 +74,7 @@ export class CreateApplicationDto {
   @ApiProperty({ required: false })
   fellowshipInfo: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: true })
   programPreferenceID: number;
 
   @ApiProperty({ required: false })

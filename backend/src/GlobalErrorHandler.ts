@@ -9,10 +9,15 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
     const response = ctx.getResponse();
     const status = exception.getStatus ? exception.getStatus() : 500;
 
-    response.status(status).json({
-      statusCode: status,
-      message: exception.message || 'Internal Server Error',
-      error: exception.constructor.name,
-    });
+    exception.response['success'] = false;
+
+    console.log({ exception: exception.response });
+
+    // response.status(status).json({
+    //   statusCode: status,
+    //   message: exception.message || 'Internal Server Error',
+    //   error: exception.constructor.name,
+    // });
+    response.status(status).json(exception.response);
   }
 }
