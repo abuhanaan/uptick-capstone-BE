@@ -87,7 +87,7 @@ export class CreateJobApplicationDto {
   @ApiProperty({ required: false })
   programPreferenceID: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: true })
   jobAppliedForID: number;
 
   @ApiProperty({ required: false, default: 'pending' })

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { File } from 'buffer';
 import { Type } from 'class-transformer';
-import { IsArray, IsDate, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsDate, IsString } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -27,11 +27,12 @@ export class CreatePostDto {
   })
   file: File;
 
-  @IsString()
+  // @IsBoolean()
+  @ApiProperty({ type: Boolean })
   published: boolean;
 
-  @IsArray()
-  @ApiProperty()
+  // @IsArray()
+  @ApiProperty({ type: [String] })
   tags: string[];
 
   @IsDate()

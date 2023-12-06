@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, Post } from '@prisma/client';
@@ -48,13 +49,15 @@ export class PostsService {
       createPostDto.image = `${this.configService.getOrThrow(
         'S3_BASE_URL',
       )}/${fileName}`;
+      const postTags: any = createPostDto.tags;
       const createdPost = await this.prismaService.post.create({
         data: {
           author: createPostDto.author,
           title: createPostDto.title,
           content: createPostDto.content,
           image: createPostDto.image,
-          published: createPostDto.published,
+          tags: Array.isArray(postTags) ? postTags : postTags.split(','),
+          published: Boolean(createPostDto.published),
           publicationDate: createPostDto.publicationDate,
         },
       });
@@ -70,12 +73,15 @@ export class PostsService {
     }
   }
 
-  async findAllPost(params: { skip?: number; take?: number }): Promise<Post[]> {
+  async findAllPost(tag?: string): Promise<Post[]> {
     try {
-      const { skip, take } = params;
+      let wherePart: { tag?: string } = {};
+
+      if (tag) {
+        wherePart.tag = tag;
+      }
       const posts = await this.prismaService.post.findMany({
-        skip,
-        take,
+        // where: wherePart,
         orderBy: { createdAt: 'desc' },
       });
 
@@ -92,9 +98,11 @@ export class PostsService {
     }
   }
 
-  async findOnePost(where: Prisma.PostWhereUniqueInput): Promise<Post | null> {
+  async findOnePost(id: number): Promise<Post | null> {
     try {
-      const post = await this.prismaService.post.findUnique({ where });
+      const post = await this.prismaService.post.findUnique({
+        where: { id },
+      });
 
       if (!post) {
         throw new NotFoundException('Post not found');
@@ -110,7 +118,7 @@ export class PostsService {
     }
   }
 
-  async getPublishedPosts() {
+  async getPublishedPosts(): Promise<Post[]> {
     try {
       const publishedPosts = await this.prismaService.post.findMany({
         where: { published: true },
@@ -147,12 +155,12 @@ export class PostsService {
   }
 
   async updatePost(
-    where: Prisma.PostWhereUniqueInput,
+    id: number,
     updatePostDto: Prisma.PostUpdateInput,
   ): Promise<Post | null> {
     try {
       const post = await this.prismaService.post.update({
-        where,
+        where: { id },
         data: updatePostDto,
       });
 
@@ -170,9 +178,9 @@ export class PostsService {
     }
   }
 
-  async deletePost(where: Prisma.PostWhereUniqueInput): Promise<string> {
+  async deletePost(id: number): Promise<string> {
     try {
-      const post = await this.prismaService.post.delete({ where });
+      const post = await this.prismaService.post.delete({ where: { id } });
 
       if (!post) {
         throw new NotFoundException('Post not found');
