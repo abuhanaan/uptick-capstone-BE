@@ -9,7 +9,7 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
     const response = ctx.getResponse();
     const status = exception.getStatus ? exception.getStatus() : 500;
 
-    exception.response['success'] = false;
+    // exception.response['success'] = false;
 
     console.log({ exception: exception.response });
 
