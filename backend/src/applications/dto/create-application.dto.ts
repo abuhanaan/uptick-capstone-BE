@@ -7,10 +7,11 @@ import {
   IsNumber,
   IsPhoneNumber,
 } from 'class-validator';
-// enum EntityType {
-//   Job = 'job',
-//   Program = 'program',
-// }
+enum TrackType {
+  backend = 'backend',
+  frontend = 'frontend',
+  mobile = 'mobile',
+}
 
 export class CreateApplicationDto {
   @IsNotEmpty()
@@ -43,6 +44,9 @@ export class CreateApplicationDto {
   // @IsNumber()
   @ApiProperty({ required: false })
   yearsOfExp: string;
+
+  @ApiProperty({ required: true, enum: TrackType })
+  prefferedTrack: string;
 
   @ApiProperty({ required: false })
   feStack: string;

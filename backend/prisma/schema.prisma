@@ -67,6 +67,7 @@ model Program {
   name                   String
   description            String
   type                   String
+  category               String?
   curriculumOutline      String[]
   objectives             String
   benefits               String
@@ -101,6 +102,10 @@ model Application {
   availability           String
   fellowshipInfo         String
   resume                 String
+  programCategory        String?
+  programType            String?
+  track                  String?
+  stack                  String?
   type                   String
   programPreferenceID    Int?
   jobAppliedForID        Int?

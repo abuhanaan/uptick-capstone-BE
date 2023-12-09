@@ -13,11 +13,12 @@ import {
   UsePipes,
   ValidationPipe,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
@@ -44,7 +45,8 @@ export class ApplicationsController {
   }
 
   @Post('/program')
-  @ApiConsumes('multipart/form-data')
+  // @ApiConsumes('multipart/form-data')
+  @ApiConsumes('application/json')
   @UsePipes(new ValidationPipe())
   create(@Body() createApplicationDto: CreateApplicationDto) {
     console.log('service controller');
@@ -55,8 +57,30 @@ export class ApplicationsController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findAll() {
-    return this.applicationsService.findAll();
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    description: 'Filter by application type: (Job or Program)',
+    enum: ['program', 'job'],
+  })
+  @ApiQuery({
+    name: 'programCategory',
+    required: false,
+    description: 'Filter by program category',
+    enum: ['Talent Tech', 'Talent Map', 'Talent Beginners', 'Talent Business'],
+  })
+  @ApiQuery({
+    name: 'programType',
+    required: false,
+    description: 'Filter by program type',
+    enum: ['Software Engineering', 'AI & Data', 'Design', 'Project Management'],
+  })
+  findAll(
+    @Query('type') type: string,
+    @Query('programCategory') programCategory?: string,
+    @Query('programType') programType?: string,
+  ) {
+    return this.applicationsService.findAll(type, programCategory, programType);
   }
 
   @Get(':id')
@@ -65,6 +89,13 @@ export class ApplicationsController {
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.applicationsService.findOne(id);
   }
+
+  // @Get(':id')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // getProgramApplicants(@Param('programType') programType: string) {
+  //   return this.applicationsService.getProgramApplicants(programType);
+  // }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)

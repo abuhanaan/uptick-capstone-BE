@@ -14,9 +14,11 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Application, Job, Program } from '@prisma/client';
 import { ProgramsService } from 'src/programs/services/programs.service';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
+// import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class ApplicationsService {
+  // prisma = new PrismaClient();
   private readonly s3Client = new S3Client({
     region: this.configService.getOrThrow('AWS_S3_REGION'),
   });
@@ -58,28 +60,8 @@ export class ApplicationsService {
         );
       }
 
-      let existingJobApplication: Application,
-        existingProgramApplication: Application;
+      let existingJobApplication: Application;
 
-      if (createApplicationDto.type === 'program') {
-        createApplicationDto.programPreferenceID =
-          +createApplicationDto.programPreferenceID;
-        const id = createApplicationDto.programPreferenceID;
-        const program = await this.prisma.program.findUnique({ where: { id } });
-        this.checkIfProgramExists(program);
-
-        createApplicationDto.jobAppliedForID = null;
-        existingProgramApplication = await this.prisma.application.findFirst({
-          where: {
-            AND: [
-              { email: createApplicationDto.email },
-              {
-                programPreferenceID: +createApplicationDto.programPreferenceID,
-              },
-            ],
-          },
-        });
-      }
       if (createApplicationDto.type === 'job') {
         createApplicationDto.jobAppliedForID =
           +createApplicationDto.jobAppliedForID;
@@ -98,8 +80,8 @@ export class ApplicationsService {
         });
       }
 
-      if (existingJobApplication || existingProgramApplication) {
-        throw new ConflictException('This application already exist');
+      if (existingJobApplication) {
+        throw new ConflictException('You have already applied for this job');
       }
 
       await this.s3Client.send(
@@ -137,8 +119,8 @@ export class ApplicationsService {
   }
 
   async create(createApplicationDto: CreateApplicationDto) {
-    console.log('service program');
     try {
+      let track: string;
       if (
         createApplicationDto.programPreferenceID &&
         createApplicationDto.jobAppliedForID
@@ -149,12 +131,13 @@ export class ApplicationsService {
       }
 
       let existingProgramApplication: Application;
+      let program: Program;
 
       if (createApplicationDto.type === 'program') {
         // createApplicationDto.programPreferenceID =
         //   +createApplicationDto.programPreferenceID;
         const id = createApplicationDto.programPreferenceID;
-        const program = await this.prisma.program.findUnique({ where: { id } });
+        program = await this.prisma.program.findUnique({ where: { id } });
         this.checkIfProgramExists(program);
 
         createApplicationDto.jobAppliedForID = null;
@@ -173,8 +156,43 @@ export class ApplicationsService {
       if (existingProgramApplication) {
         throw new ConflictException('This application already exist');
       }
+      const newApplicationObj = {
+        firstname: createApplicationDto.firstname,
+        lastName: createApplicationDto.lastName,
+        email: createApplicationDto.email,
+        phone: createApplicationDto.email,
+        address: createApplicationDto.address,
+        city: createApplicationDto.city,
+        yearsOfExp: createApplicationDto.yearsOfExp,
+        feStack: createApplicationDto.feStack,
+        beStack: createApplicationDto.beStack,
+        mobileStack: createApplicationDto.mobileStack,
+        otherStack: createApplicationDto.otherStack,
+        githubLink: createApplicationDto.githubLink,
+        careerGoals: createApplicationDto.careerGoals,
+        portfolioLink: createApplicationDto.portfolioLink,
+        availability: createApplicationDto.availability,
+        fellowshipInfo: createApplicationDto.fellowshipInfo,
+        resume: '',
+        programType: program.type,
+        programCategory: program.category,
+        track: createApplicationDto.prefferedTrack,
+        stack:
+          track === 'backend'
+            ? createApplicationDto.beStack
+            : track === 'frontend'
+            ? createApplicationDto.feStack
+            : track === 'mobile'
+            ? createApplicationDto.mobileStack
+            : null,
+        type: createApplicationDto.type,
+        programPreferenceID: createApplicationDto.programPreferenceID,
+        jobAppliedForID: null,
+        status: 'pending',
+      };
+      console.log(newApplicationObj);
       return this.prisma.application.create({
-        data: createApplicationDto as any,
+        data: newApplicationObj,
       });
     } catch (error) {
       console.error('Original error:', error);
@@ -195,9 +213,46 @@ export class ApplicationsService {
     }
   }
 
-  findAll() {
+  async findAll(type?: string, programCategory?: string, programType?: string) {
     try {
-      return this.prisma.application.findMany();
+      if (programCategory && !type && !programType) {
+        const stats = {
+          'Software Engineering': 0,
+          'AI & Data': 0,
+          Design: 0,
+          'Project Management': 0,
+        };
+
+        const categoryApplicants = await this.prisma.application.findMany({
+          where: { programCategory },
+        });
+
+        if (programCategory === 'Talent Tech') {
+          categoryApplicants.forEach((applicant) => {
+            const category = applicant.programType;
+
+            if (
+              [
+                'Software Engineering',
+                'AI & Data',
+                'Design',
+                'Project Management',
+              ].includes(category)
+            ) {
+              stats[category] += 1;
+            }
+          });
+        }
+
+        return stats;
+      }
+      return this.prisma.application.findMany({
+        where: {
+          type,
+          programCategory,
+          programType,
+        },
+      });
     } catch (error) {
       console.log(error);
       throw new Error('Could not get any application');
