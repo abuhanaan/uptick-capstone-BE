@@ -6,4 +6,5 @@ enum ProgramType {
   Project_Management = 'Project Management',
   Startup_School = 'Startup School',
 }
+
 export default ProgramType;

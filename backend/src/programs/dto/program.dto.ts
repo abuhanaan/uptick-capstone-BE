@@ -1,6 +1,22 @@
-import { IsString, IsArray, IsDateString, IsOptional, ArrayNotEmpty, ArrayUnique, IsNotEmpty, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsDateString,
+  IsOptional,
+  ArrayNotEmpty,
+  ArrayUnique,
+  IsNotEmpty,
+  IsEnum,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import ProgramType from '../enum/programType.enum';
+
+enum ProgramCategory {
+  Talent_Tech = 'Talent Tech',
+  Talent_Map = 'Talent_Map',
+  Talent_Business = 'Talent_Business',
+  Talent_Beginners = 'Talent_Beginners',
+}
 
 export class CreateProgramDto {
   @ApiProperty()
@@ -13,20 +29,24 @@ export class CreateProgramDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({enum:ProgramType})
+  @ApiProperty({ enum: ProgramType })
   @IsEnum(ProgramType)
   type: ProgramType;
 
-  @ApiProperty({required:false})
+  @ApiProperty({ enum: ProgramCategory })
+  @IsEnum(ProgramCategory)
+  category: ProgramCategory;
+
+  @ApiProperty({ required: false })
   @IsArray()
   @ArrayUnique()
   curriculumOutline: string[];
 
-  @ApiProperty({required:false})
+  @ApiProperty({ required: false })
   @IsString()
   objectives: string;
 
-  @ApiProperty({required:false})
+  @ApiProperty({ required: false })
   @IsString()
   benefits: string;
 
@@ -50,7 +70,7 @@ export class CreateProgramDto {
   @IsNotEmpty()
   enrollmentInformation: string;
 
-@ApiProperty({})
+  @ApiProperty({})
   @IsDateString()
   startDate: Date;
 
@@ -70,7 +90,7 @@ export class UpdateProgramDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({enum:ProgramType})
+  @ApiProperty({ enum: ProgramType })
   @IsEnum(ProgramType)
   type: ProgramType;
 
@@ -116,7 +136,7 @@ export class UpdateProgramDto {
   @IsDateString()
   startDate?: Date;
 
-  @ApiProperty({ required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsDateString()
   endDate?: Date;
