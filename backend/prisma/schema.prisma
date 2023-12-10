@@ -57,6 +57,7 @@ model Job {
   companyName          String?
   requirements         String
   applicationFormLink  String
+  companyDescription   String?
   companyLogo          String
   applicationDeadline  DateTime
   startDate            DateTime @default(now())

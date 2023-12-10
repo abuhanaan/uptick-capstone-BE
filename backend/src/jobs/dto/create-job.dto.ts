@@ -71,6 +71,11 @@ export class CreateJobDto {
 
   @IsString()
   @IsDefined()
+  @ApiProperty({ required: true })
+  companyDescription: string;
+
+  @IsString()
+  @IsDefined()
   @ApiProperty()
   @IsNotEmpty({ message: 'requirements is a required field!' })
   requirements: string;
