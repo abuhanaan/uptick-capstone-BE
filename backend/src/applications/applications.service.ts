@@ -242,9 +242,8 @@ export class ApplicationsService {
               stats[category] += 1;
             }
           });
+          return stats;
         }
-
-        return stats;
       }
       return this.prisma.application.findMany({
         where: {
