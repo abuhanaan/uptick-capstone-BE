@@ -10,6 +10,27 @@ import {
 import { DateNotGreaterThan } from '../decorators/date.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 
+enum JobMode {
+  onsite = 'Onsite',
+  remote = 'Remote',
+  hybrid = 'Hybrid',
+}
+
+enum JobCategory {
+  software_engineering = 'Software Engineering',
+  product_design = 'Product Design',
+  data = 'Data',
+  product_management = 'Product Management',
+  sales_operations = 'Sales / Operations',
+}
+
+enum JobType {
+  fulltime = 'Full-time',
+  parttime = 'Part-time',
+  contract = 'Contract',
+  internship = 'Internship',
+}
+
 export class CreateJobDto {
   @IsString()
   @IsDefined()
@@ -22,6 +43,31 @@ export class CreateJobDto {
   @ApiProperty()
   @IsNotEmpty({ message: 'description is a required field!' })
   description: string;
+
+  @IsString()
+  @IsDefined()
+  @ApiProperty({ required: true, enum: JobMode })
+  jobMode: string;
+
+  @IsString()
+  @IsDefined()
+  @ApiProperty({ required: true, enum: JobCategory })
+  jobCategory: string;
+
+  @IsString()
+  @IsDefined()
+  @ApiProperty({ required: true })
+  location: string;
+
+  @IsString()
+  @IsDefined()
+  @ApiProperty({ required: true, enum: JobType })
+  jobType: string;
+
+  @IsString()
+  @IsDefined()
+  @ApiProperty({ required: true })
+  companyName: string;
 
   @IsString()
   @IsDefined()

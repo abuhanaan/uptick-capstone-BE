@@ -50,11 +50,16 @@ model Job {
   id                   Int       @id @default(autoincrement())
   title                String
   description          String
+  jobMode              String?
+  jobCategory          String?
+  location             String?
+  jobType              String?
+  companyName          String?
   requirements         String
   applicationFormLink  String
   companyLogo          String
   applicationDeadline  DateTime
-  startDate            DateTime 
+  startDate            DateTime @default(now())
   endDate              DateTime
 
   Applications         Application[]

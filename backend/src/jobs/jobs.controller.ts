@@ -53,6 +53,11 @@ export class JobsController {
       properties: {
         title: { type: 'string' },
         description: { type: 'string' },
+        jobMode: { type: 'string' },
+        jobCategory: { type: 'string' },
+        location: { type: 'string' },
+        jobType: { type: 'string' },
+        companyName: { type: 'string' },
         requirements: { type: 'string' },
         applicationFormLink: { type: 'string' },
         applicationDeadline: { type: 'string', format: 'date-time' },
@@ -63,6 +68,11 @@ export class JobsController {
       required: [
         'title',
         'description',
+        'jobMode',
+        'jobCategory',
+        'location',
+        'jobType',
+        'companyName',
         'requirements',
         'applicationFormLink',
         'applicationDeadline',
