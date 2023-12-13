@@ -75,12 +75,23 @@ export class ApplicationsController {
     description: 'Filter by program type',
     enum: ['Software Engineering', 'AI & Data', 'Design', 'Project Management'],
   })
+  @ApiQuery({
+    name: 'jobAppliedForID',
+    required: false,
+    description: 'Filter by job id',
+  })
   findAll(
     @Query('type') type: string,
     @Query('programCategory') programCategory?: string,
     @Query('programType') programType?: string,
+    @Query('jobAppliedForID') jobAppliedForID?: number,
   ) {
-    return this.applicationsService.findAll(type, programCategory, programType);
+    return this.applicationsService.findAll(
+      type,
+      programCategory,
+      programType,
+      jobAppliedForID,
+    );
   }
 
   @Get(':id')

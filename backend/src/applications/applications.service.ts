@@ -213,7 +213,12 @@ export class ApplicationsService {
     }
   }
 
-  async findAll(type?: string, programCategory?: string, programType?: string) {
+  async findAll(
+    type?: string,
+    programCategory?: string,
+    programType?: string,
+    jobAppliedForID?: number,
+  ) {
     try {
       if (programCategory && !type && !programType) {
         const stats = {
@@ -251,6 +256,7 @@ export class ApplicationsService {
           type,
           programCategory,
           programType,
+          jobAppliedForID,
         },
       });
     } catch (error) {
