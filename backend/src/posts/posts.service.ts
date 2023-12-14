@@ -13,6 +13,7 @@ import { Prisma, Post } from '@prisma/client';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { CreatePostDto } from './dto/create-post.dto';
+import { CreateDummyPostDto } from './dto/create-dummy-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -56,6 +57,42 @@ export class PostsService {
           title: createPostDto.title,
           content: createPostDto.content,
           image: createPostDto.image,
+          tags: Array.isArray(postTags) ? postTags : postTags.split(','),
+          published: Boolean(createPostDto.published),
+          publicationDate: createPostDto.publicationDate,
+        },
+      });
+      return createdPost;
+    } catch (error) {
+      console.error('Original error:', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      } else if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to create the post');
+    }
+  }
+
+  async create2(createPostDto: CreateDummyPostDto): Promise<Post> {
+    try {
+      const existingPost = await this.prismaService.post.findFirst({
+        where: { title: createPostDto.title },
+      });
+
+      if (existingPost) {
+        throw new ConflictException(
+          `Post with title ${createPostDto.title} already exist`,
+        );
+      }
+
+      const postTags: any = createPostDto.tags;
+      const createdPost = await this.prismaService.post.create({
+        data: {
+          author: createPostDto.author,
+          title: createPostDto.title,
+          content: createPostDto.content,
+          image: 'no image for now',
           tags: Array.isArray(postTags) ? postTags : postTags.split(','),
           published: Boolean(createPostDto.published),
           publicationDate: createPostDto.publicationDate,

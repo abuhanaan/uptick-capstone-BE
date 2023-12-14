@@ -29,6 +29,7 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CreateDummyPostDto } from './dto/create-dummy-post.dto';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -47,12 +48,25 @@ export class PostsController {
     @UploadedFile(new ParseFilePipe({ validators: [] }))
     file: Express.Multer.File,
   ) {
-    console.log('Post Controller');
+    console.log({ postRequestBody: createPostDto });
+    console.log({ fileObject: file });
+
     return this.postsService.create(
       createPostDto,
       file.originalname,
       file.buffer,
     );
+  }
+
+  @Post('/dummy')
+  @ApiConsumes('multipart/form-data')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UsePipes(new ValidationPipe())
+  @ApiOperation({ summary: 'Create a new post' })
+  async createPost2(@Body() createDummyPostDto: CreateDummyPostDto) {
+    console.log({ postRequestBody: createDummyPostDto });
+    return this.postsService.create2(createDummyPostDto);
   }
 
   @Get()
